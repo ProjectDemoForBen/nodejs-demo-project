@@ -14,6 +14,11 @@ const app = express();
 // npm install --save body-parser
 app.use(bodyParser.urlencoded({extended: false}));
 
+// middleware that allows us to serve static files (forwarded directly from the filesystem)
+// gives read access to the root path
+app.use(express.static(path.join(__dirname, 'public')))
+// can register multiple static folders, it will go through all of them until it gets a match
+
 
 // middlewares that should match all request should be put first
 // eg
@@ -25,7 +30,7 @@ app.use('/', (req, res, next) => {
 // para acceder al route de admin es necesario que
 // tenga como prepend /admin
 // ej. /admin/add-product
-app.use('/admin' ,adminRoutes);   // dentro de adminRoutes, no es necesario saber que tiene como prepend /admin
+app.use('/admin', adminRoutes);   // dentro de adminRoutes, no es necesario saber que tiene como prepend /admin
 
 app.use(shopRoutes);
 

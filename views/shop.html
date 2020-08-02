@@ -3,23 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <title>Add Product</title>
+
+    <!-- includes static files that are in the folder set in the static middleware-->
+    <link rel="stylesheet" href="/css/main.css">
 </head>
 <body>
-<header>
-    <nav>
-        <ul>
-            <li>
-                <a href="/">Shop</a>
-            </li>
-            <li>
-                <a href="/admin/add-product">Add Product</a>
-            </li>
-        </ul>
-    </nav>
-</header>
-<main>
-    <h1>My Products</h1>
-    <p>List all products...</p>
-</main>
+    <header class="main-header">
+        <nav class="main-header__nav">
+            <ul class="main-header__item-list">
+                <li class="main-header__item">
+                    <a href="/" class="active">Shop</a>
+                </li>
+                <li class="main-header__item">
+                    <a href="/admin/add-product">Add Product</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h1>My Products</h1>
+        <p>List all products...</p>
+    </main>
 </body>
 </html>
