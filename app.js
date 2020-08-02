@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
+const path = require("path");
 
 // initializes express object that handles the incoming requests
 const app = express();
@@ -32,7 +33,7 @@ app.use(shopRoutes);
 app.use((req, res, next) => {
 
     res.status(404);
-    res.send("<h1>Page not found :(</h1>")
+    res.sendFile(path.join(__dirname, 'views', 'not-found.html'));
 });
 
 app.listen(3000);
