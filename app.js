@@ -2,12 +2,15 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 
-const adminRoutes = require('./routes/admin');
+const adminData = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const rootDir = require('./utils/path');
 
 // initializes express object that handles the incoming requests
 const app = express();
+app.set('view engine', 'pug');
+// use html views stored in the views folder
+app.set('views', 'views');
 
 // by default, express doesnt parse the request body, so add Parser Middleware
 // text parser
@@ -29,14 +32,16 @@ app.use('/', (req, res, next) => {
 // para acceder al route de admin es necesario que
 // tenga como prepend /admin
 // ej. /admin/add-product
-app.use('/admin', adminRoutes); // dentro de adminRoutes, no es necesario saber que tiene como prepend /admin
+app.use('/admin', adminData.router); // dentro de adminRoutes, no es necesario saber que tiene como prepend /admin
 
 app.use(shopRoutes);
 
 // requests goes from top to bottom, so if it reaches this path, return an 404 page
 app.use((req, res, next) => {
     res.status(404);
-    res.sendFile(path.join(rootDir, 'views', '404.html'));
+
+    // res.sendFile(path.join(rootDir, 'views', '404.html'));
+    res.render('404', { pageTitle: 'Not Found' });
 });
 
 app.listen(3000);
