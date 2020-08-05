@@ -20,9 +20,6 @@ router.get('/', (req, res, next) => {
     // the second parameter is data that should be added to the template
     res.render('shop', {
         path: '/',
-        productCss: true,
-        activeShop: true,
-        hasProds: products.length > 0,
         pageTitle: 'Shop',
         prods: products,
     });
