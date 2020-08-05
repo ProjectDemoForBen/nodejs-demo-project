@@ -18,7 +18,14 @@ router.get('/', (req, res, next) => {
 
     // render using the template engine defined in "view engine" in the folder defined in "views"
     // the second parameter is data that should be added to the template
-    res.render('shop', { prods: products, pageTitle: 'Shop', path: '/' });
+    res.render('shop', {
+        path: '/',
+        productCss: true,
+        activeShop: true,
+        hasProds: products.length > 0,
+        pageTitle: 'Shop',
+        prods: products,
+    });
 });
 
 module.exports = router;

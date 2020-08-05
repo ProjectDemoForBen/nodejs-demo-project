@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
+const expressHbs = require('express-handlebars');
 
 const adminData = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
@@ -8,7 +9,21 @@ const rootDir = require('./utils/path');
 
 // initializes express object that handles the incoming requests
 const app = express();
-app.set('view engine', 'pug');
+// set not built-in template engine
+// set name for custom template engine
+// (views/layouts/ is the default)
+app.engine(
+    'hbs',
+    expressHbs({
+        layoutsDir: 'views/layouts/',
+        defaultLayout: 'main',
+        extname: 'hbs',
+    })
+);
+
+// the name should match, the file extension of the views should also match
+app.set('view engine', 'hbs');
+
 // use html views stored in the views folder
 app.set('views', 'views');
 
