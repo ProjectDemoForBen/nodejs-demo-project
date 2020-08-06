@@ -1,4 +1,4 @@
-const products = [];
+const Product = require('../models/product');
 
 exports.getAddProduct = (req, res, next) => {
     // res.sendFile(path.join(rootDir, 'views', 'add-product.html'));
@@ -12,22 +12,24 @@ exports.postAddProduct = (req, res, next) => {
     // req.body is added by ExpressJS
 
     const title = req.body.title;
-    products.push({ title });
+    const product = new Product(title);
+    product.save();
+
     res.redirect('/');
 };
 
 exports.getProducts = (req, res, next) => {
-    // __dirname: get absolute path of the file where is used
-    // path.join: concatenates files so it works on any OS  (do not use / (slashes))
-    // "../" is allowed, to go up one level
+    Product.fetchAll((products) => {
+        // __dirname: get absolute path of the file where is used
+        // path.join: concatenates files so it works on any OS  (do not use / (slashes))
+        // "../" is allowed, to go up one level
 
-    console.log(products);
-
-    // render using the template engine defined in "view engine" in the folder defined in "views"
-    // the second parameter is data that should be added to the template
-    res.render('shop', {
-        path: '/',
-        pageTitle: 'Shop',
-        prods: products,
+        // render using the template engine defined in "view engine" in the folder defined in "views"
+        // the second parameter is data that should be added to the template
+        res.render('shop', {
+            path: '/',
+            pageTitle: 'Shop',
+            prods: products,
+        });
     });
 };
