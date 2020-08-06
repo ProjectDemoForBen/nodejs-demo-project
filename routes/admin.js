@@ -1,34 +1,15 @@
-const path = require('path');
 const express = require('express');
-
-const rootDir = require('../utils/path');
 
 // like a mini express which is plug to the expressjs
 // works like app
 const router = express.Router();
 
-const products = [];
+const productsController = require('../controllers/products');
 
 // default path is '/'
 // use: it is a startsWith so, the specific address should be put first
 // get,... : the url should match the path
-router.get('/add-product', (req, res, next) => {
-    // res.sendFile(path.join(rootDir, 'views', 'add-product.html'));
-    res.render('add-product', {
-        path: '/admin/add-product',
-        pageTitle: 'Add Product',
-    });
-});
+router.get('/add-product', productsController.getAddProduct);
+router.post('/add-product', productsController.postAddProduct);
 
-router.post('/add-product', (req, res, next) => {
-    // req.body is added by ExpressJS
-
-    const title = req.body.title;
-    products.push({ title });
-    res.redirect('/');
-});
-
-module.exports = {
-    router,
-    products,
-};
+module.exports = router;
