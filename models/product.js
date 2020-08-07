@@ -24,6 +24,7 @@ module.exports = class Product {
 
     save = () => {
         getProductsFromFile((products) => {
+            this.id = products.length + 1;
             products.push(this);
 
             fs.writeFile(productsFile, JSON.stringify(products), (err1) => {
@@ -34,5 +35,10 @@ module.exports = class Product {
 
     static fetchAll = (cb) => {
         getProductsFromFile(cb);
+    };
+    static findById = (id, cb) => {
+        getProductsFromFile((products) => {
+            cb(products.find((product) => product.id === parseInt(id)));
+        });
     };
 };

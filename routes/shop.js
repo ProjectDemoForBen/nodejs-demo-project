@@ -7,7 +7,14 @@ const router = express.Router();
 
 router.get('/', shopController.getIndex);
 router.get('/products', shopController.getProducts);
+
+// router expect path parameter (can be anything), so it will match if it is "/products/delete" (so the order will matter)
+// put more specific path first
+router.get('/products/:productId', shopController.getProduct);
+
 router.get('/cart', shopController.getCart);
+router.post('/cart', shopController.postCart);
+
 router.get('/checkout', shopController.getCheckout);
 router.get('/orders', shopController.getOrders);
 
