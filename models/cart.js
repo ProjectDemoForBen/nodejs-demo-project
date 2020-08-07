@@ -20,6 +20,8 @@ module.exports = class Cart {
     };
 
     static addProduct = (id, productPrice) => {
+        id = parseInt(id);
+        productPrice = parseInt(productPrice);
         getCartFromFile((cart) => {
             cart.products = [...cart.products];
 
@@ -33,11 +35,35 @@ module.exports = class Cart {
                 );
                 cart.products[index] = { ...product, qty: product.qty + 1 };
             } else {
-                cart.products.push({ id, qty: 1 });
+                cart.products.push({ id: id, qty: 1 });
             }
-            cart.totalPrice += parseInt(productPrice);
+            cart.totalPrice += productPrice;
             fs.writeFile(cartFile, JSON.stringify(cart), (err1) => {
                 console.log(err1);
+            });
+        });
+    };
+
+    static removeProduct = (id, productPrice, cb) => {
+        id = parseInt(id);
+        productPrice = parseInt(productPrice);
+        getCartFromFile((cart) => {
+            cart.products = [...cart.products];
+
+            const index = cart.products.findIndex(
+                (product) => product.id === id
+            );
+            console.log(cart);
+            console.log(index);
+            if (index >= 0) {
+                cart.totalPrice -= cart.products[index].qty * productPrice;
+
+                cart.products.splice(index, 1);
+            } else {
+            }
+            fs.writeFile(cartFile, JSON.stringify(cart), (err1) => {
+                console.log(err1);
+                cb();
             });
         });
     };

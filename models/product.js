@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const rootDir = require('../utils/path');
+const Cart = require('./cart');
 
 const productsFile = path.join(rootDir, 'data', 'products.json');
 
@@ -48,22 +49,25 @@ module.exports = class Product {
         getProductsFromFile(cb);
     };
     static findById = (id, cb) => {
+        id = parseInt(id);
         getProductsFromFile((products) => {
-            cb(products.find((product) => product.id === parseInt(id)));
+            cb(products.find((product) => product.id === id));
         });
     };
 
     static deleteById = (id, cb) => {
+        id = parseInt(id);
         getProductsFromFile((products) => {
-            const index = products.findIndex(
-                (product) => product.id === parseInt(id)
-            );
+            const index = products.findIndex((product) => product.id === id);
+            const product = products[index];
             products.splice(index, 1);
-            cb();
             fs.writeFile(productsFile, JSON.stringify(products), (err1) => {
                 if (!err1) {
+                    console.log('no error removing product');
+                    Cart.removeProduct(id, product.price, cb);
                 } else {
                     console.log(`error saving products: ${err1}`);
+                    cb();
                 }
             });
         });
