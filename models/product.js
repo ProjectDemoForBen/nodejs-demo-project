@@ -15,23 +15,31 @@ const getProductsFromFile = (cb) => {
 };
 
 module.exports = class Product {
-    constructor(title, imageUrl, description, price) {
+    constructor(id, title, imageUrl, description, price) {
+        this.id = id ? parseInt(id) : null;
         this.title = title;
         this.imageUrl = imageUrl;
         this.description = description;
         this.price = price;
     }
 
-    save = () => {
+    save() {
         getProductsFromFile((products) => {
-            this.id = products.length + 1;
-            products.push(this);
-
+            if (this.id) {
+                const index = products.findIndex(
+                    (product) => product.id === this.id
+                );
+                products[index] = this;
+            } else {
+                this.id = products.length + 1;
+                products.push(this);
+            }
+            console.log(products);
             fs.writeFile(productsFile, JSON.stringify(products), (err1) => {
-                console.log(err1);
+                console.log(`error saving products: ${err1}`);
             });
         });
-    };
+    }
 
     static fetchAll = (cb) => {
         getProductsFromFile(cb);
