@@ -32,7 +32,11 @@ module.exports = class Product {
                 );
                 products[index] = this;
             } else {
-                this.id = products.length + 1;
+                if (products.length === 0) {
+                    this.id = 1;
+                } else {
+                    this.id = products[products.length - 1].id + 1;
+                }
                 products.push(this);
             }
             console.log(products);

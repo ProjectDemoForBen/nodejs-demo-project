@@ -19,7 +19,7 @@ module.exports = class Cart {
         getCartFromFile(cb);
     };
 
-    static addProduct = (id, productPrice) => {
+    static addProduct = (id, productPrice, cb) => {
         id = parseInt(id);
         productPrice = parseInt(productPrice);
         getCartFromFile((cart) => {
@@ -39,7 +39,11 @@ module.exports = class Cart {
             }
             cart.totalPrice += productPrice;
             fs.writeFile(cartFile, JSON.stringify(cart), (err1) => {
-                console.log(err1);
+                if (err1) {
+                    console.log(err1);
+                }
+
+                cb();
             });
         });
     };
@@ -62,7 +66,9 @@ module.exports = class Cart {
             } else {
             }
             fs.writeFile(cartFile, JSON.stringify(cart), (err1) => {
-                console.log(err1);
+                if (err1) {
+                    console.log(err1);
+                }
                 cb();
             });
         });
