@@ -73,6 +73,16 @@ exports.postCart = (req, res, next) => {
     });
 };
 
+exports.postRemoveItemFromCart = (req, res, next) => {
+    const { productId } = req.body;
+    Product.findById(productId, (product) => {
+        Cart.removeProduct(productId, product.price, () => {
+            console.log('postRemoveItemFromCart: redirecting');
+            res.redirect('cart');
+        });
+    });
+};
+
 exports.getCheckout = (req, res, next) => {
     res.render('shop/checkout', {
         path: '/checkout',
