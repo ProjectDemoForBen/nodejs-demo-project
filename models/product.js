@@ -36,7 +36,10 @@ module.exports = class Product {
             }
             console.log(products);
             fs.writeFile(productsFile, JSON.stringify(products), (err1) => {
-                console.log(`error saving products: ${err1}`);
+                if (!err1) {
+                } else {
+                    console.log(`error saving products: ${err1}`);
+                }
             });
         });
     }
@@ -47,6 +50,22 @@ module.exports = class Product {
     static findById = (id, cb) => {
         getProductsFromFile((products) => {
             cb(products.find((product) => product.id === parseInt(id)));
+        });
+    };
+
+    static deleteById = (id, cb) => {
+        getProductsFromFile((products) => {
+            const index = products.findIndex(
+                (product) => product.id === parseInt(id)
+            );
+            products.splice(index, 1);
+            cb();
+            fs.writeFile(productsFile, JSON.stringify(products), (err1) => {
+                if (!err1) {
+                } else {
+                    console.log(`error saving products: ${err1}`);
+                }
+            });
         });
     };
 };

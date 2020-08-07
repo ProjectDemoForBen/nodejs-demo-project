@@ -47,3 +47,10 @@ exports.getProducts = (req, res, next) => {
         });
     });
 };
+
+exports.postDeleteProduct = (req, res, next) => {
+    const { id } = req.body;
+    Product.deleteById(id, () => {
+        res.redirect('/admin/products');
+    });
+};
