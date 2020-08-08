@@ -27,7 +27,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // middlewares that should match all request should be put first
 // eg
 app.use('/', (req, res, next) => {
-    // console.log("always run");
+    console.log('always run');
     next();
 });
 

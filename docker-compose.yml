@@ -1,0 +1,19 @@
+version: '3.3'
+services:
+    db:
+        container_name: node-3-test-db
+        image: mysql:5.7.30
+        restart: always
+        environment:
+            MYSQL_DATABASE: 'mysql'
+            MYSQL_USER: 'root'
+            MYSQL_PASSWORD: '1234'
+            MYSQL_ROOT_PASSWORD: '1234'
+        ports:
+            # <Port exposed> : < MySQL Port running inside container>
+            - '3306:3306'
+        volumes:
+            - node-test-db:/var/lib/mysql
+
+volumes:
+    node-test-db:
