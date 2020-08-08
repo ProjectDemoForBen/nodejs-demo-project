@@ -5,6 +5,7 @@ const path = require('path');
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const errorController = require('./controllers/error');
+const sequelize = require('./utils/database');
 
 // initializes express object that handles the incoming requests
 const app = express();
@@ -41,6 +42,15 @@ app.use(shopRoutes);
 // requests goes from top to bottom, so if it reaches this path, return an 404 page
 app.use(errorController.get404);
 
-app.listen(3000);
+// syncs models to the db (creating tables, relations, ...)
+sequelize
+    .sync()
+    .then((result) => {
+        // console.log(result);
+        app.listen(3000);
+    })
+    .catch((error) => {
+        console.log('error: ', error);
+    });
 
 // now, request can be done accessing "localhost:3000"

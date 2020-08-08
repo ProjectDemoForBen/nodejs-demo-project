@@ -1,19 +1,19 @@
 const Product = require('../models/product');
 const Cart = require('../models/cart');
 
-exports.getProducts = (req, res, next) => {
-    Product.fetchAll()
-        .then(([products, fieldData]) => {
-            // __dirname: get absolute path of the file where is used
-            // path.join: concatenates files so it works on any OS  (do not use / (slashes))
-            // "../" is allowed, to go up one level
+// __dirname: get absolute path of the file where is used
+// path.join: concatenates files so it works on any OS  (do not use / (slashes))
+// "../" is allowed, to go up one level
 
+exports.getProducts = (req, res, next) => {
+    Product.findAll()
+        .then((result) => {
             // render using the template engine defined in "view engine" in the folder defined in "views"
             // the second parameter is data that should be added to the template
             res.render('shop/product-list', {
                 path: '/products',
                 pageTitle: 'Shop',
-                prods: products,
+                prods: result,
             });
         })
         .catch((error) => {
@@ -23,22 +23,36 @@ exports.getProducts = (req, res, next) => {
 
 exports.getProduct = (req, res, next) => {
     const { productId } = req.params;
-    Product.findById(productId, (product) => {
+
+    // Product.findAll({
+    //     where: {
+    //         id: productId,
+    //     },
+    // }).then((r) => {
+    //     const product = r[0];
+    //     res.render('shop/product-detail', {
+    //         path: '/products',
+    //         pageTitle: product.title,
+    //         product: product,
+    //     });
+    // });
+
+    Product.findByPk(productId).then((r) => {
         res.render('shop/product-detail', {
             path: '/products',
-            pageTitle: product.title,
-            product: product,
+            pageTitle: r.title,
+            product: r,
         });
     });
 };
 
 exports.getIndex = (req, res, next) => {
-    Product.fetchAll()
-        .then(([rows, fieldData]) => {
+    Product.findAll()
+        .then((result) => {
             res.render('shop/index', {
                 path: '/',
                 pageTitle: 'Shop',
-                prods: rows,
+                prods: result,
             });
         })
         .catch((error) => {

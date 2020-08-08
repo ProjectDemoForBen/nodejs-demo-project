@@ -57,6 +57,14 @@ form {
     color: #ffeb3b;
 }
 
+.image {
+    max-height: 20rem;
+}
+
+.image img {
+    height: 100%;
+}
+
 .centered {
     text-align: center;
 }
