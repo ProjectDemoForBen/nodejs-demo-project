@@ -13,30 +13,44 @@ exports.postAddProduct = (req, res, next) => {
     // req.body is added by ExpressJS
     const { title, imageUrl, description, price } = req.body;
 
-    Product.create({
-        title,
-        imageUrl,
-        description,
-        price,
-    })
+    req.user
+        .createProduct({
+            // method added automatically by sequelize given the association definition
+            title,
+            imageUrl,
+            description,
+            price,
+        })
         .then((r) => {
-            console.log(r);
             res.redirect('/admin/products');
         })
         .catch((error) => {
             console.log(error);
         });
+
+    // Product.create({
+    //     title,
+    //     imageUrl,
+    //     description,
+    //     price,
+    //     // userId: req.user.id,
+    // })
 };
 
 exports.getEditProduct = (req, res, next) => {
     const { productId } = req.params;
-
-    Product.findByPk(productId)
-        .then(({ dataValues }) => {
+    req.user
+        .getProducts({
+            where: {
+                id: productId,
+            },
+        })
+        .then((products) => {
+            const product = products[0];
             res.render('admin/edit-product', {
                 path: '',
                 pageTitle: 'Edit Product',
-                product: dataValues,
+                product: product,
             });
         })
         .catch((error) => console.log(error));
@@ -63,7 +77,8 @@ exports.postEditProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-    Product.findAll()
+    req.user
+        .getProducts()
         .then((result) => {
             res.render('admin/products', {
                 path: '/admin/products',
