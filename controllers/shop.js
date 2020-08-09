@@ -189,3 +189,46 @@ exports.getOrders = (req, res, next) => {
         pageTitle: 'Orders',
     });
 };
+
+exports.postCreateOrder = (req, res, next) => {
+    let fetchedCart = null;
+    let createdOrder = null;
+    let productsInCart = null;
+
+    req.user
+        .getCart()
+        .then((cart) => {
+            fetchedCart = cart;
+            return cart.getProducts();
+        })
+        .then((products) => {
+            productsInCart = products;
+            return req.user.createOrder();
+        })
+        .then((order) => {
+            createdOrder = order;
+
+            productsInCart.every((product) => {
+                product.order_item = {
+                    quantity: product.cart_item.quantity,
+                };
+            });
+
+            return order.addProducts(productsInCart);
+        })
+        .then((result) => {
+            console.log(result);
+
+            return fetchedCart.setProducts(null);
+            // return Promise.all(
+            //     productsInCart.map((product) => product.cart_item.destroy())
+            // );
+        })
+        .then((result) => {
+            console.log(result);
+            res.redirect('/orders');
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+};
