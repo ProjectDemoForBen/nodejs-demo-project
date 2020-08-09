@@ -184,10 +184,20 @@ exports.getCheckout = (req, res, next) => {
 };
 
 exports.getOrders = (req, res, next) => {
-    res.render('shop/orders', {
-        path: '/orders',
-        pageTitle: 'Orders',
-    });
+    req.user
+        // include: eager loading
+        .getOrders({ include: ['products'] }) // because an Order has many Product(s), and Product has the many in the defined statement to 'product'
+        .then((orders) => {
+            console.log(orders);
+            res.render('shop/orders', {
+                path: '/orders',
+                pageTitle: 'Orders',
+                orders: orders,
+            });
+        })
+        .catch((error) => {
+            console.log(error);
+        });
 };
 
 exports.postCreateOrder = (req, res, next) => {
@@ -208,7 +218,7 @@ exports.postCreateOrder = (req, res, next) => {
         .then((order) => {
             createdOrder = order;
 
-            productsInCart.every((product) => {
+            productsInCart.forEach((product) => {
                 product.order_item = {
                     quantity: product.cart_item.quantity,
                 };
