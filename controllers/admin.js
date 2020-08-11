@@ -13,28 +13,15 @@ exports.postAddProduct = (req, res, next) => {
     // req.body is added by ExpressJS
     const { title, imageUrl, description, price } = req.body;
 
-    req.user
-        .createProduct({
-            // method added automatically by sequelize given the association definition
-            title,
-            imageUrl,
-            description,
-            price,
-        })
+    const product = new Product(title, price, imageUrl, description);
+    product
+        .save()
         .then((r) => {
             res.redirect('/admin/products');
         })
         .catch((error) => {
             console.log(error);
         });
-
-    // Product.create({
-    //     title,
-    //     imageUrl,
-    //     description,
-    //     price,
-    //     // userId: req.user.id,
-    // })
 };
 
 exports.getEditProduct = (req, res, next) => {
