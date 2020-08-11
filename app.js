@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 
 const adminRoutes = require('./routes/admin');
-// const shopRoutes = require('./routes/shop');
+const shopRoutes = require('./routes/shop');
 const errorController = require('./controllers/error');
 const mongoConnect = require('./utils/database').mongoConnect;
 
@@ -50,7 +50,7 @@ app.use('/', (req, res, next) => {
 // ej. /admin/add-product
 app.use('/admin', adminRoutes); // dentro de adminRoutes, no es necesario saber que tiene como prepend /admin
 
-// app.use(shopRoutes);
+app.use(shopRoutes);
 
 // requests goes from top to bottom, so if it reaches this path, return an 404 page
 app.use(errorController.get404);

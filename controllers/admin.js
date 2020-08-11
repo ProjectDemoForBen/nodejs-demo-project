@@ -64,8 +64,7 @@ exports.postEditProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-    req.user
-        .getProducts()
+    Product.fetchAll()
         .then((result) => {
             res.render('admin/products', {
                 path: '/admin/products',
