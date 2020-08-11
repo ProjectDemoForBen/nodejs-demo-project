@@ -5,7 +5,7 @@ const collection = 'products';
 
 class Product {
     constructor(id, title, price, imageUrl, description) {
-        this._id = mongoDb.ObjectID(id);
+        this._id = id ? mongoDb.ObjectID(id) : null;
         this.title = title;
         this.price = price;
         this.imageUrl = imageUrl;
@@ -46,6 +46,13 @@ class Product {
             .collection(collection)
             .find({ _id: new mongoDb.ObjectID(id) }) // because the _id is stored as an ObjectId
             .next();
+    }
+
+    static deleteById(id) {
+        const db = getDb();
+        return db
+            .collection(collection)
+            .deleteOne({ _id: new mongoDb.ObjectID(id) });
     }
 }
 

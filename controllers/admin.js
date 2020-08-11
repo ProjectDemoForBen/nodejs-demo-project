@@ -70,24 +70,11 @@ exports.getProducts = (req, res, next) => {
 exports.postDeleteProduct = (req, res, next) => {
     const { id } = req.body;
 
-    Product.findByPk(id)
-        .then((product) => {
-            return product.destroy();
-        })
+    Product.deleteById(id)
         .then((result) => {
             res.redirect('/admin/products');
         })
         .catch((error) => {
             console.log(error);
         });
-    //
-    // Product.destroy({
-    //     where: {
-    //         id: id,
-    //     },
-    // })
-    //     .then((result) => {
-    //         res.redirect('/admin/products');
-    //     })
-    //     .catch((error) => {});
 };
