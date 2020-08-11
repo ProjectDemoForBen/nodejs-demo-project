@@ -5,7 +5,8 @@ const path = require('path');
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const errorController = require('./controllers/error');
-const mongoConnect = require('./utils/database').mongoConnect;
+const { mongoConnect } = require('./utils/database');
+const User = require('./models/user');
 
 // initializes express object that handles the incoming requests
 const app = express();
@@ -25,18 +26,20 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 // can register multiple static folders, it will go through all of them until it gets a match
 
-// app.use((req, res, next) => {
-//     console.log('retrieving user');
-//     // add User to the request, so the following functions can access the user
-//     User.findByPk(1)
-//         .then((user) => {
-//             req.user = user;
-//             next();
-//         })
-//         .catch((error) => {
-//             console.log(error);
-//         });
-// });
+app.use((req, res, next) => {
+    console.log('retrieving user');
+    // add User to the request, so the following functions can access the user
+
+    User.findById('5f32199b65b777e8c9034927')
+        .then((user) => {
+            req.user = user;
+            next();
+        })
+
+        .catch((error) => {
+            console.log(error);
+        });
+});
 
 // middlewares that should match all request should be put first
 // eg
