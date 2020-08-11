@@ -13,7 +13,7 @@ exports.postAddProduct = (req, res, next) => {
     // req.body is added by ExpressJS
     const { title, imageUrl, description, price } = req.body;
 
-    const product = new Product(title, price, imageUrl, description);
+    const product = new Product(null, title, price, imageUrl, description);
     product
         .save()
         .then((r) => {
@@ -26,14 +26,8 @@ exports.postAddProduct = (req, res, next) => {
 
 exports.getEditProduct = (req, res, next) => {
     const { productId } = req.params;
-    req.user
-        .getProducts({
-            where: {
-                id: productId,
-            },
-        })
-        .then((products) => {
-            const product = products[0];
+    Product.findById(productId)
+        .then((product) => {
             res.render('admin/edit-product', {
                 path: '',
                 pageTitle: 'Edit Product',
@@ -47,14 +41,10 @@ exports.postEditProduct = (req, res, next) => {
     // req.body is added by ExpressJS
     const { id, title, imageUrl, description, price } = req.body;
 
-    Product.findByPk(id)
-        .then((product) => {
-            product.title = title;
-            product.imageUrl = imageUrl;
-            product.description = description;
-            product.price = price;
-            return product.save();
-        })
+    const product = new Product(id, title, price, imageUrl, description);
+
+    product
+        .save()
         .then((updatedProduct) => {
             res.redirect('/admin/products');
         })

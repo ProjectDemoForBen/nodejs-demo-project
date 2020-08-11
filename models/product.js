@@ -4,7 +4,8 @@ const getDb = require('../utils/database').getDb;
 const collection = 'products';
 
 class Product {
-    constructor(title, price, imageUrl, description) {
+    constructor(id, title, price, imageUrl, description) {
+        this._id = mongoDb.ObjectID(id);
         this.title = title;
         this.price = price;
         this.imageUrl = imageUrl;
@@ -13,8 +14,19 @@ class Product {
 
     save() {
         const db = getDb();
-
-        return db.collection(collection).insertOne(this);
+        const dbCollection = db.collection(collection);
+        if (this._id) {
+            return dbCollection.updateOne(
+                {
+                    _id: this._id,
+                },
+                {
+                    $set: this,
+                }
+            );
+        } else {
+            return dbCollection.insertOne(this);
+        }
     }
 
     static fetchAll() {
