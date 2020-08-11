@@ -4,12 +4,13 @@ const getDb = require('../utils/database').getDb;
 const collection = 'products';
 
 class Product {
-    constructor(id, title, price, imageUrl, description) {
+    constructor(id, title, price, imageUrl, description, userId) {
         this._id = id ? mongoDb.ObjectID(id) : null;
         this.title = title;
         this.price = price;
         this.imageUrl = imageUrl;
         this.description = description;
+        this.userId = userId;
     }
 
     save() {
@@ -21,7 +22,12 @@ class Product {
                     _id: this._id,
                 },
                 {
-                    $set: this,
+                    $set: {
+                        title: this.title,
+                        price: this.price,
+                        imageUrl: this.imageUrl,
+                        description: this.description,
+                    },
                 }
             );
         } else {
