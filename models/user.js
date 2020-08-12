@@ -47,6 +47,39 @@ class User {
             })
             .toArray()
             .then((products) => {
+                if (this.cart.items.length !== products.length) {
+                    const updatedCart = {
+                        items: [],
+                    };
+                    products.forEach((product) => {
+                        const cartItem = this.cart.items.find(
+                            (item) =>
+                                item.productId.toString() ===
+                                product._id.toString()
+                        );
+                        updatedCart.items.push(cartItem);
+                    });
+
+                    return db
+                        .collection(collection)
+                        .updateOne(
+                            {
+                                _id: this._id,
+                            },
+                            {
+                                $set: {
+                                    cart: updatedCart,
+                                },
+                            }
+                        )
+                        .then((result) => {
+                            return products;
+                        });
+                }
+
+                return products;
+            })
+            .then((products) => {
                 return {
                     items: products.map((product) => {
                         const cartProduct = this.cart.items.find(
