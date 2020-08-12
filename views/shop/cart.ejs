@@ -22,13 +22,13 @@
                                     <%= product.price %>
                                 </h2>
                                 <p>
-                                    Quantity: <%= product.cart_item.quantity %>
+                                    Quantity: <%= product.quantity %>
                                 </p>
                             </div>
                             <div class="card__actions">
                                 <form action="/cart-remove-item" method="POST">
                                     <button class="btn" type="submit">Delete</button>
-                                    <input type="hidden" name="productId" value="<%= product.id %>">
+                                    <input type="hidden" name="productId" value="<%= product._id %>">
                                 </form>
 
                             </div>

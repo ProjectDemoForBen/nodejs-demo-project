@@ -10,7 +10,7 @@ class Product {
         this.price = price;
         this.imageUrl = imageUrl;
         this.description = description;
-        this.userId = userId;
+        this.userId = userId; // user who added the Product
     }
 
     save() {
