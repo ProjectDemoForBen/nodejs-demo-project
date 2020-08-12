@@ -85,18 +85,7 @@ exports.postRemoveItemFromCart = (req, res, next) => {
     const { productId } = req.body;
 
     req.user
-        .getCart()
-        .then((cart) => {
-            return cart.getProducts({
-                where: {
-                    id: productId,
-                },
-            });
-        })
-        .then((products) => {
-            const product = products[0];
-            return product.cart_item.destroy();
-        })
+        .deleteItemFromCart(productId)
         .then((result) => {
             console.log('postRemoveItemFromCart: redirecting');
             res.redirect('cart');
@@ -115,8 +104,7 @@ exports.getCheckout = (req, res, next) => {
 
 exports.getOrders = (req, res, next) => {
     req.user
-        // include: eager loading
-        .getOrders({ include: ['products'] }) // because an Order has many Product(s), and Product has the many in the defined statement to 'product'
+        .getOrders()
         .then((orders) => {
             console.log(orders);
             res.render('shop/orders', {
@@ -131,39 +119,8 @@ exports.getOrders = (req, res, next) => {
 };
 
 exports.postCreateOrder = (req, res, next) => {
-    let fetchedCart = null;
-    let createdOrder = null;
-    let productsInCart = null;
-
     req.user
-        .getCart()
-        .then((cart) => {
-            fetchedCart = cart;
-            return cart.getProducts();
-        })
-        .then((products) => {
-            productsInCart = products;
-            return req.user.createOrder();
-        })
-        .then((order) => {
-            createdOrder = order;
-
-            productsInCart.forEach((product) => {
-                product.order_item = {
-                    quantity: product.cart_item.quantity,
-                };
-            });
-
-            return order.addProducts(productsInCart);
-        })
-        .then((result) => {
-            console.log(result);
-
-            return fetchedCart.setProducts(null);
-            // return Promise.all(
-            //     productsInCart.map((product) => product.cart_item.destroy())
-            // );
-        })
+        .addOrder()
         .then((result) => {
             console.log(result);
             res.redirect('/orders');

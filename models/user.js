@@ -60,6 +60,69 @@ class User {
             });
     }
 
+    deleteItemFromCart(productId) {
+        const updatedCartItems = this.cart.items.filter(
+            (item) => item.productId.toString() !== productId.toString()
+        );
+
+        const db = getDb();
+        return db.collection(collection).updateOne(
+            {
+                _id: this._id,
+            },
+            {
+                $set: {
+                    cart: {
+                        items: updatedCartItems,
+                    },
+                },
+            }
+        );
+    }
+
+    addOrder() {
+        const db = getDb();
+
+        return this.getCart()
+            .then((items) => {
+                const order = {
+                    ...items,
+                    user: {
+                        _id: this._id,
+                        name: this.name,
+                        email: this.email,
+                    },
+                };
+
+                return db.collection('orders').insertOne(order);
+            })
+            .then((result) => {
+                return db.collection('users').updateOne(
+                    {
+                        _id: this._id,
+                    },
+                    {
+                        $set: {
+                            cart: {
+                                items: [],
+                            },
+                        },
+                    }
+                );
+            });
+    }
+
+    getOrders() {
+        const db = getDb();
+
+        return db
+            .collection('orders')
+            .find({
+                'user._id': this._id,
+            })
+            .toArray();
+    }
+
     save() {
         const db = getDb();
         const dbCollection = db.collection(collection);
