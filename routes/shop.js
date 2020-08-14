@@ -12,8 +12,8 @@ router.get('/products', shopController.getProducts);
 // put more specific path first
 router.get('/products/:productId', shopController.getProduct);
 
-// router.get('/cart', shopController.getCart);
-// router.post('/cart', shopController.postCart);
+router.get('/cart', shopController.getCart);
+router.post('/cart', shopController.postCart);
 // router.post('/cart-remove-item', shopController.postRemoveItemFromCart);
 // //
 // // router.get('/checkout', shopController.getCheckout);
