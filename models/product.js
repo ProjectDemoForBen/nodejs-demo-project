@@ -23,4 +23,6 @@ const productSchema = new Schema({
     },
 });
 
+// connects schema to a name
+// the table name is the name lower-case with an s
 module.exports = mongoose.model('Product', productSchema);

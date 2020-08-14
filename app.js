@@ -5,8 +5,7 @@ const path = require('path');
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const errorController = require('./controllers/error');
-const { mongoConnect } = require('./utils/database');
-const User = require('./models/user');
+const mongoose = require('mongoose');
 
 // initializes express object that handles the incoming requests
 const app = express();
@@ -26,20 +25,20 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 // can register multiple static folders, it will go through all of them until it gets a match
 
-app.use((req, res, next) => {
-    console.log('retrieving user');
-    // add User to the request, so the following functions can access the user
-
-    User.findById('5f32199b65b777e8c9034927')
-        .then((user) => {
-            req.user = new User(user._id, user.name, user.email, user.cart);
-            next();
-        })
-
-        .catch((error) => {
-            console.log(error);
-        });
-});
+// app.use((req, res, next) => {
+//     console.log('retrieving user');
+//     // add User to the request, so the following functions can access the user
+//
+//     User.findById('5f32199b65b777e8c9034927')
+//         .then((user) => {
+//             req.user = new User(user._id, user.name, user.email, user.cart);
+//             next();
+//         })
+//
+//         .catch((error) => {
+//             console.log(error);
+//         });
+// });
 
 // middlewares that should match all request should be put first
 // eg
@@ -58,8 +57,19 @@ app.use(shopRoutes);
 // requests goes from top to bottom, so if it reaches this path, return an 404 page
 app.use(errorController.get404);
 
-mongoConnect(() => {
-    app.listen(3000);
-});
+mongoose
+    .connect(
+        'mongodb://root:example@localhost:27017/shop?authSource=admin&w=1',
+        {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        }
+    )
+    .then((result) => {
+        app.listen(3000);
+    })
+    .catch((error) => {
+        console.log(error);
+    });
 
 // now, request can be done accessing "localhost:3000"

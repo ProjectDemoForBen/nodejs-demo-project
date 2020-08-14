@@ -13,14 +13,14 @@ exports.postAddProduct = (req, res, next) => {
     // req.body is added by ExpressJS
     const { title, imageUrl, description, price } = req.body;
 
-    const product = new Product(
-        null,
-        title,
-        price,
-        imageUrl,
-        description,
-        req.user._id
-    );
+    // the values are map to the attributes in the schema
+    const product = new Product({
+        title: title,
+        imageUrl: imageUrl,
+        description: description,
+        price: price,
+    });
+
     product
         .save()
         .then((r) => {
