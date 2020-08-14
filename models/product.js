@@ -21,6 +21,11 @@ const productSchema = new Schema({
         type: String,
         required: true,
     },
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: 'User', // name of the model to which the ObjectID is related
+        required: true,
+    },
 });
 
 // connects schema to a name
