@@ -61,7 +61,7 @@ exports.postEditProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-    Product.fetchAll()
+    Product.find()
         .then((result) => {
             res.render('admin/products', {
                 path: '/admin/products',

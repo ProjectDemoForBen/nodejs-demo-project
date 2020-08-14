@@ -6,7 +6,7 @@ const Product = require('../models/product');
 // "../" is allowed, to go up one level
 
 exports.getProducts = (req, res, next) => {
-    Product.fetchAll()
+    Product.find()
         .then((result) => {
             // render using the template engine defined in "view engine" in the folder defined in "views"
             // the second parameter is data that should be added to the template
@@ -34,7 +34,7 @@ exports.getProduct = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
-    Product.fetchAll()
+    Product.find()
         .then((result) => {
             res.render('shop/index', {
                 path: '/',
