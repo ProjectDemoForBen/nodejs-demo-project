@@ -48,10 +48,15 @@ exports.postEditProduct = (req, res, next) => {
     // req.body is added by ExpressJS
     const { id, title, imageUrl, description, price } = req.body;
 
-    const product = new Product(id, title, price, imageUrl, description);
+    Product.findById(id)
+        .then((product) => {
+            product.title = title;
+            product.price = price;
+            product.imageUrl = imageUrl;
+            product.description = description;
 
-    product
-        .save()
+            return product.save();
+        })
         .then((updatedProduct) => {
             res.redirect('/admin/products');
         })
@@ -77,7 +82,7 @@ exports.getProducts = (req, res, next) => {
 exports.postDeleteProduct = (req, res, next) => {
     const { id } = req.body;
 
-    Product.deleteById(id)
+    Product.findByIdAndRemove(id)
         .then((result) => {
             res.redirect('/admin/products');
         })
