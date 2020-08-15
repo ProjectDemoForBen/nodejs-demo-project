@@ -20,3 +20,12 @@ exports.postLogin = (req, res, next) => {
             console.log(error);
         });
 };
+
+exports.postLogout = (req, res, next) => {
+    // all session data (in the database) is destroyed
+    // the client still has the browser (but it's not a problem :) )
+    req.session.destroy((err) => {
+        console.log(err);
+        res.redirect('/');
+    });
+};
