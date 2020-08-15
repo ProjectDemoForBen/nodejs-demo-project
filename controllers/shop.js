@@ -1,5 +1,5 @@
 const Product = require('../models/product');
-// const Cart = require('../models/cart');
+const Order = require('../models/order');
 
 // __dirname: get absolute path of the file where is used
 // path.join: concatenates files so it works on any OS  (do not use / (slashes))
@@ -104,10 +104,10 @@ exports.getCheckout = (req, res, next) => {
 };
 
 exports.getOrders = (req, res, next) => {
-    req.user
-        .getOrders()
+    Order.find({
+        userId: req.user._id,
+    })
         .then((orders) => {
-            console.log(orders);
             res.render('shop/orders', {
                 path: '/orders',
                 pageTitle: 'Orders',

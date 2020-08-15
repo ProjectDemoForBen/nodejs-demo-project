@@ -12,8 +12,8 @@
                         <ul>
                             <% order.items.forEach( product => {%>
                             <li>
-                                <p>Title: <%= product.title %></p>
-                                <p>Description: <%= product.description %></p>
+                                <p>Title: <%= product.productId.title %></p>
+                                <p>Description: <%= product.productId.description %></p>
                                 <p>Quantity: <%= product.quantity %></p>
                             </li>
                             <% }); %>
