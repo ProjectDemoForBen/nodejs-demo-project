@@ -31,6 +31,8 @@ app.use((req, res, next) => {
     console.log('retrieving user');
     // add User to the request, so the following functions can access the user
 
+    console.log(req.get('Cookie'));
+
     User.findOne()
         .then((user) => {
             req.user = user;
