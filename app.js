@@ -4,6 +4,7 @@ const path = require('path');
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
+const authRoutes = require('./routes/auth');
 const errorController = require('./controllers/error');
 const mongoose = require('mongoose');
 const User = require('./models/user');
@@ -54,6 +55,7 @@ app.use('/', (req, res, next) => {
 app.use('/admin', adminRoutes); // dentro de adminRoutes, no es necesario saber que tiene como prepend /admin
 
 app.use(shopRoutes);
+app.use(authRoutes);
 
 // requests goes from top to bottom, so if it reaches this path, return an 404 page
 app.use(errorController.get404);
