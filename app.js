@@ -45,6 +45,21 @@ app.use(
     })
 );
 
+app.use((req, res, next) => {
+    if (req.session.userId) {
+        User.findById(req.session.userId)
+            .then((user) => {
+                req.user = user;
+                next();
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    } else {
+        next();
+    }
+});
+
 // middlewares that should match all request should be put first
 // eg
 app.use('/', (req, res, next) => {

@@ -12,9 +12,15 @@ exports.postLogin = (req, res, next) => {
     User.findOne()
         .then((user) => {
             req.session.isLoggedIn = true;
-            req.session.user = user;
+            req.session.userId = user._id;
 
-            res.redirect('/');
+            // se podria directamente hacer el redirect,
+            // pero el redirect y el save se ejecutarian de manera independiente
+            // por lo que llamar a save explicitamente y esperar a que se guarde en la basededatos para
+            // hacer el redirect :)
+            req.session.save((error) => {
+                res.redirect('/');
+            });
         })
         .catch((error) => {
             console.log(error);
