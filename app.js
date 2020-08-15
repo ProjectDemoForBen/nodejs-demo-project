@@ -84,21 +84,6 @@ mongoose
         useUnifiedTopology: true,
     })
     .then((result) => {
-        return User.findOne();
-    })
-    .then((user) => {
-        if (!user) {
-            const nUser = new User({
-                name: 'Marcelo',
-                email: 'marcelo@cardozo.com',
-                cart: {
-                    items: [],
-                },
-            });
-            return nUser.save();
-        }
-    })
-    .then((user) => {
         app.listen(3000);
     })
     .catch((error) => {
