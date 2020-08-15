@@ -8,9 +8,18 @@ const authRoutes = require('./routes/auth');
 const errorController = require('./controllers/error');
 const mongoose = require('mongoose');
 const User = require('./models/user');
+const session = require('express-session');
+const MongoDBStore = require('connect-mongodb-session')(session);
+
+const MONGO_DB_URI =
+    'mongodb://root:example@localhost:27017/shop?authSource=admin&w=1';
 
 // initializes express object that handles the incoming requests
 const app = express();
+const store = new MongoDBStore({
+    uri: MONGO_DB_URI,
+    collection: 'sessions', // collection where sessions data will be store
+});
 
 app.set('view engine', 'ejs');
 
@@ -27,22 +36,14 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 // can register multiple static folders, it will go through all of them until it gets a match
 
-app.use((req, res, next) => {
-    console.log('retrieving user');
-    // add User to the request, so the following functions can access the user
-
-    console.log(req.get('Cookie'));
-
-    User.findOne()
-        .then((user) => {
-            req.user = user;
-            next();
-        })
-
-        .catch((error) => {
-            console.log(error);
-        });
-});
+app.use(
+    session({
+        secret: 'secret', // used to hash the sessionId
+        resave: false, // session is not saved on every request but only when it changes
+        saveUninitialized: false,
+        store: store,
+    })
+);
 
 // middlewares that should match all request should be put first
 // eg
@@ -63,13 +64,10 @@ app.use(authRoutes);
 app.use(errorController.get404);
 
 mongoose
-    .connect(
-        'mongodb://root:example@localhost:27017/shop?authSource=admin&w=1',
-        {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        }
-    )
+    .connect(MONGO_DB_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    })
     .then((result) => {
         return User.findOne();
     })
