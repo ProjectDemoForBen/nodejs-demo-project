@@ -10,6 +10,7 @@ const mongoose = require('mongoose');
 const User = require('./models/user');
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
+const csrf = require('csurf');
 
 const MONGO_DB_URI =
     'mongodb://root:example@localhost:27017/shop?authSource=admin&w=1';
@@ -20,6 +21,9 @@ const store = new MongoDBStore({
     uri: MONGO_DB_URI,
     collection: 'sessions', // collection where sessions data will be store
 });
+
+// default: the token is saved in the session (can be set to cookie)-
+const csrfProtection = csrf();
 
 app.set('view engine', 'ejs');
 
@@ -44,6 +48,7 @@ app.use(
         store: store,
     })
 );
+app.use(csrfProtection);
 
 app.use((req, res, next) => {
     if (req.session.userId) {
@@ -64,6 +69,14 @@ app.use((req, res, next) => {
 // eg
 app.use('/', (req, res, next) => {
     console.log('always run');
+    next();
+});
+
+app.use((req, res, next) => {
+    // for every request, these values will be available
+    res.locals.isAuthenticated = req.session.isLoggedIn;
+    res.locals.csrfToken = req.csrfToken();
+
     next();
 });
 

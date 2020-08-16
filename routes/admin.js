@@ -8,7 +8,7 @@ const router = express.Router();
 
 const adminController = require('../controllers/admin');
 
-// all the other routes will require to be authenticated
+// all the next routes will require to be authenticated
 router.use(isAuth);
 
 // default path is '/'
