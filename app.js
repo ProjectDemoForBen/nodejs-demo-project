@@ -11,6 +11,7 @@ const User = require('./models/user');
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const csrf = require('csurf');
+const flash = require('connect-flash');
 
 const MONGO_DB_URI =
     'mongodb://root:example@localhost:27017/shop?authSource=admin&w=1';
@@ -49,6 +50,7 @@ app.use(
     })
 );
 app.use(csrfProtection);
+app.use(flash());
 
 app.use((req, res, next) => {
     if (req.session.userId) {
