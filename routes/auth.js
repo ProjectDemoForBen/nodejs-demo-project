@@ -6,7 +6,19 @@ const authController = require('../controllers/auth');
 const User = require('../models/user');
 
 router.get('/login', authController.getLogin);
-router.post('/login', authController.postLogin);
+router.post(
+    '/login',
+    [
+        body('email', 'email should have email format :P').isEmail(),
+        body(
+            'password',
+            'password should be at least 6 characters long and alphanumeric'
+        )
+            .isAlphanumeric()
+            .isLength({ min: 6 }),
+    ],
+    authController.postLogin
+);
 router.post('/logout', authController.postLogout);
 router.get('/signup', authController.getSignup);
 router.post(
