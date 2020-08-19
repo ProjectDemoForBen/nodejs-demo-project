@@ -49,14 +49,20 @@ exports.postEditProduct = (req, res, next) => {
     // req.body is added by ExpressJS
     const { id, title, imageUrl, description, price } = req.body;
 
-    Product.findById(id)
-        .then((product) => {
-            product.title = title;
-            product.price = price;
-            product.imageUrl = imageUrl;
-            product.description = description;
+    Product.find({
+        _id: id,
+        userId: req.user._id,
+    })
+        .then((products) => {
+            if (products.length > 0) {
+                const product = products[0];
+                product.title = title;
+                product.price = price;
+                product.imageUrl = imageUrl;
+                product.description = description;
 
-            return product.save();
+                return product.save();
+            }
         })
         .then((updatedProduct) => {
             res.redirect('/admin/products');
@@ -67,7 +73,7 @@ exports.postEditProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-    Product.find()
+    Product.find({ userId: req.user._id })
         .then((result) => {
             res.render('admin/products', {
                 path: '/admin/products',
@@ -83,7 +89,10 @@ exports.getProducts = (req, res, next) => {
 exports.postDeleteProduct = (req, res, next) => {
     const { id } = req.body;
 
-    Product.findByIdAndRemove(id)
+    Product.deleteOne({
+        _id: id,
+        userId: req.user._id,
+    })
         .then((result) => {
             res.redirect('/admin/products');
         })
