@@ -1,3 +1,4 @@
+const { validationResult } = require('express-validator');
 const Product = require('../models/product');
 
 exports.getAddProduct = (req, res, next) => {
@@ -5,11 +6,24 @@ exports.getAddProduct = (req, res, next) => {
     res.render('admin/edit-product', {
         path: '/admin/add-product',
         pageTitle: 'Add Product',
-        product: null,
+        errorMessage: '',
+        oldInput: {},
+        validationErrors: [],
     });
 };
 
 exports.postAddProduct = (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.render('admin/edit-product', {
+            path: '/admin/add-product',
+            pageTitle: 'Add Product',
+            errorMessage: errors.array()[0].msg,
+            oldInput: { ...req.body },
+            validationErrors: errors.array(),
+        });
+    }
+
     // req.body is added by ExpressJS
     const { title, imageUrl, description, price } = req.body;
 
@@ -39,18 +53,31 @@ exports.getEditProduct = (req, res, next) => {
             res.render('admin/edit-product', {
                 path: '',
                 pageTitle: 'Edit Product',
-                product: product,
+                errorMessage: '',
+                oldInput: { ...product._doc },
+                validationErrors: [],
             });
         })
         .catch((error) => console.log(error));
 };
 
 exports.postEditProduct = (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.render('admin/edit-product', {
+            path: '',
+            pageTitle: 'Edit Product',
+            errorMessage: errors.array()[0].msg,
+            oldInput: { ...req.body },
+            validationErrors: errors.array(),
+        });
+    }
+
     // req.body is added by ExpressJS
-    const { id, title, imageUrl, description, price } = req.body;
+    const { _id, title, imageUrl, description, price } = req.body;
 
     Product.find({
-        _id: id,
+        _id: _id,
         userId: req.user._id,
     })
         .then((products) => {

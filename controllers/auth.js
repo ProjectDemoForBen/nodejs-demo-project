@@ -25,6 +25,8 @@ exports.getLogin = (req, res, next) => {
         path: '/login',
         pageTitle: 'Login',
         errorMessage: message,
+        oldInput: {},
+        validationErrors: [],
     });
 };
 
@@ -35,6 +37,8 @@ exports.postLogin = (req, res, next) => {
             path: '/login',
             pageTitle: 'Login',
             errorMessage: errors.array()[0].msg,
+            oldInput: { ...req.body },
+            validationErrors: errors.array(),
         });
     }
 
@@ -93,6 +97,8 @@ exports.getSignup = (req, res, next) => {
         path: '/signup',
         pageTitle: 'Sign Up',
         errorMessage: message,
+        oldInput: {},
+        validationErrors: [],
     });
 };
 
@@ -103,6 +109,8 @@ exports.postSignup = (req, res, next) => {
             path: '/signup',
             pageTitle: 'Sign Up',
             errorMessage: errors.array()[0].msg,
+            oldInput: { ...req.body },
+            validationErrors: errors.array(),
         });
     }
 
@@ -224,25 +232,25 @@ exports.postResetPassword = (req, res, next) => {
 
     let userF = null;
     User.find({
-        resetToken: password,
+        resetToken: passwordToken,
         resetTokenExpiration: {
             $gt: Date.now(),
         },
         _id: userId,
     })
         .then((user) => {
-            if (!user) {
+            if (user.length === 0) {
                 return res.redirect('/');
             }
 
-            userF = user;
+            userF = user[0];
             return bcrypt.hash(password, 12);
         })
         .then((hashedPassword) => {
             if (hashedPassword) {
                 userF.password = hashedPassword;
                 userF.resetToken = null;
-                userF.resetTokenExpiration = undefined;
+                userF.resetTokenExpiration = null;
                 return userF.save();
             }
         })

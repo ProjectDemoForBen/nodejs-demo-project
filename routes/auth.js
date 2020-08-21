@@ -9,7 +9,9 @@ router.get('/login', authController.getLogin);
 router.post(
     '/login',
     [
-        body('email', 'email should have email format :P').isEmail(),
+        body('email', 'email should have email format :P')
+            .isEmail()
+            .normalizeEmail(),
         body(
             'password',
             'password should be at least 6 characters long and alphanumeric'
@@ -36,7 +38,8 @@ router.post(
                         return Promise.reject('Email already used');
                     }
                 });
-            }),
+            })
+            .normalizeEmail(),
         body(
             'password',
             'password should be at least 6 characters long and alphanumeric'
