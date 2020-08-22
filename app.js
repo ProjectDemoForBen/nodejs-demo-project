@@ -53,14 +53,27 @@ app.use(csrfProtection);
 app.use(flash());
 
 app.use((req, res, next) => {
+    // for every request, these values will be available
+    res.locals.isAuthenticated = req.session.isLoggedIn;
+    res.locals.csrfToken = req.csrfToken();
+
+    next();
+});
+
+app.use((req, res, next) => {
     if (req.session.userId) {
         User.findById(req.session.userId)
             .then((user) => {
+                if (!user) {
+                    return next();
+                }
                 req.user = user;
                 next();
             })
-            .catch((error) => {
-                console.log(error);
+            .catch((err) => {
+                const error = new Error(err);
+                error.httpStatusCode = 500;
+                return next(error);
             });
     } else {
         next();
@@ -74,14 +87,6 @@ app.use('/', (req, res, next) => {
     next();
 });
 
-app.use((req, res, next) => {
-    // for every request, these values will be available
-    res.locals.isAuthenticated = req.session.isLoggedIn;
-    res.locals.csrfToken = req.csrfToken();
-
-    next();
-});
-
 // para acceder al route de admin es necesario que
 // tenga como prepend /admin
 // ej. /admin/add-product
@@ -90,8 +95,17 @@ app.use('/admin', adminRoutes); // dentro de adminRoutes, no es necesario saber 
 app.use(shopRoutes);
 app.use(authRoutes);
 
+app.use('/500', errorController.get500);
+
 // requests goes from top to bottom, so if it reaches this path, return an 404 page
 app.use(errorController.get404);
+
+app.use((err, req, res, next) => {
+    res.status(500).render('500', {
+        pageTitle: 'Error :(',
+        path: '/500',
+    });
+});
 
 mongoose
     .connect(MONGO_DB_URI, {

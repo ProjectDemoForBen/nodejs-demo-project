@@ -71,9 +71,10 @@ exports.postLogin = (req, res, next) => {
                 }
             });
         })
-        .catch((error) => {
-            console.log(error);
-            res.redirect('/login');
+        .catch((err) => {
+            const error = new Error(err);
+            error.httpStatusCode = 500;
+            return next(error);
         });
 };
 
@@ -137,8 +138,10 @@ exports.postSignup = (req, res, next) => {
                 html: '<h1>Successfully signed up</h1>',
             });
         })
-        .catch((error) => {
-            console.log(error);
+        .catch((err) => {
+            const error = new Error(err);
+            error.httpStatusCode = 500;
+            return next(error);
         });
 };
 
@@ -191,6 +194,11 @@ exports.postReset = (req, res, next) => {
                     <p>If you don't want to reset your credentials, just ignore this message and nothing will be changed.</p>
                     `,
                 });
+            })
+            .catch((err) => {
+                const error = new Error(err);
+                error.httpStatusCode = 500;
+                return next(error);
             });
     });
 };
@@ -222,8 +230,10 @@ exports.getResetPassword = (req, res, next) => {
                 passwordToken: token,
             });
         })
-        .catch((error1) => {
-            console.log(error1);
+        .catch((err) => {
+            const error = new Error(err);
+            error.httpStatusCode = 500;
+            return next(error);
         });
 };
 
@@ -258,7 +268,9 @@ exports.postResetPassword = (req, res, next) => {
             console.log(user);
             res.redirect('/login');
         })
-        .catch((error) => {
-            console.log(error);
+        .catch((err) => {
+            const error = new Error(err);
+            error.httpStatusCode = 500;
+            return next(error);
         });
 };
