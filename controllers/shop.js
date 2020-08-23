@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 const Product = require('../models/product');
 const Order = require('../models/order');
 
@@ -142,5 +145,25 @@ exports.postCreateOrder = (req, res, next) => {
             const error = new Error(err);
             error.httpStatusCode = 500;
             return next(error);
+        });
+};
+
+exports.getInvoice = (req, res, next) => {
+    Order.findById(req.params.orderId)
+        .then((order) => {
+            if (!order || order.userId.toString() !== req.user._id.toString()) {
+                return next(new Error('Cannot get invoice for order'));
+            }
+
+            const invoiceName = `${req.params.orderId}.pdf`;
+            const invoicePath = path.join('data', 'invoices', invoiceName);
+
+            const file = fs.createReadStream(invoicePath);
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `inline`);
+            file.pipe(res);
+        })
+        .catch((err) => {
+            return next(err);
         });
 };
