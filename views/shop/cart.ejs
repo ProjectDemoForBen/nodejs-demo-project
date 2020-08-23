@@ -38,10 +38,7 @@
                 </div>
                 <hr>
                 <div class="centered">
-                    <form action="/create-order" method="post">
-                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                        <button class="btn" type="submit">Order Now!</button>
-                    </form>
+                    <a href="/checkout" class="btn">Go to checkout</a>
                 </div>
 
             <% } else { %>

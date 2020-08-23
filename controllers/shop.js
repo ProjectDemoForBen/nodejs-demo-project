@@ -156,10 +156,29 @@ exports.postRemoveItemFromCart = (req, res, next) => {
 };
 
 exports.getCheckout = (req, res, next) => {
-    res.render('shop/checkout', {
-        path: '/checkout',
-        pageTitle: 'Checkout',
-    });
+    req.user
+        .populate('cart.items.productId')
+        .execPopulate()
+        .then((user) => {
+            const products = user.cart.items;
+            const data = {
+                path: '/checkout',
+                pageTitle: 'Checkout',
+                products: products,
+                total: products.reduce(
+                    (previousValue, currentValue) =>
+                        previousValue +
+                        currentValue.productId.price * currentValue.quantity,
+                    0
+                ),
+            };
+            res.render('shop/checkout', data);
+        })
+        .catch((err) => {
+            const error = new Error(err);
+            error.httpStatusCode = 500;
+            return next(error);
+        });
 };
 
 exports.getOrders = (req, res, next) => {
