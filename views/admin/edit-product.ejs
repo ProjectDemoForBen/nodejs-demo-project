@@ -14,7 +14,7 @@
         </div>
     <% } %>
 
-    <form class="product-form" action="/admin/<%= oldInput._id ? 'edit-product' : 'add-product'%>" method="POST" novalidate>
+    <form class="product-form" action="/admin/<%= oldInput._id ? 'edit-product' : 'add-product'%>" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <div class="form-control">
             <label for="title">Title</label>
@@ -27,13 +27,11 @@
                     value="<%= oldInput.title %>">
         </div>
         <div class="form-control">
-            <label for="imageUrl">Image Url</label>
+            <label for="image">Image</label>
             <input
-                    class="<%= validationErrors.find(e => e.param === 'imageUrl') ? 'invalid' : '' %>"
-                    type="text"
-                    name="imageUrl"
-                    id="imageUrl"
-                    value="<%= oldInput.imageUrl %>">
+                    type="file"
+                    name="image"
+                    id="image">
         </div>
         <div class="form-control">
             <label for="price">Price</label>

@@ -15,7 +15,7 @@ exports.getAddProduct = (req, res, next) => {
 exports.postAddProduct = (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.render('admin/edit-product', {
+        return res.status(422).render('admin/edit-product', {
             path: '/admin/add-product',
             pageTitle: 'Add Product',
             errorMessage: errors.array()[0].msg,
@@ -23,10 +23,20 @@ exports.postAddProduct = (req, res, next) => {
             validationErrors: errors.array(),
         });
     }
+    // req.file is added by multer
+    if (!req.file) {
+        return res.status(422).render('admin/edit-product', {
+            path: '/admin/add-product',
+            pageTitle: 'Add Product',
+            errorMessage: 'Image should be png, jpg, jpeg',
+            oldInput: { ...req.body },
+            validationErrors: [],
+        });
+    }
 
     // req.body is added by ExpressJS
-    const { title, imageUrl, description, price } = req.body;
-
+    const { title, description, price } = req.body;
+    const imageUrl = req.file.path;
     // the values are map to the attributes in the schema
     const product = new Product({
         title: title,
@@ -80,8 +90,8 @@ exports.postEditProduct = (req, res, next) => {
     }
 
     // req.body is added by ExpressJS
-    const { _id, title, imageUrl, description, price } = req.body;
-
+    const { _id, title, description, price } = req.body;
+    const image = req.file;
     Product.find({
         _id: _id,
         userId: req.user._id,
@@ -91,7 +101,9 @@ exports.postEditProduct = (req, res, next) => {
                 const product = products[0];
                 product.title = title;
                 product.price = price;
-                product.imageUrl = imageUrl;
+                if (image) {
+                    product.imageUrl = image.path;
+                }
                 product.description = description;
 
                 return product.save();

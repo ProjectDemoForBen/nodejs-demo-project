@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const multer = require('multer');
 const path = require('path');
 
 const adminRoutes = require('./routes/admin');
@@ -26,6 +27,31 @@ const store = new MongoDBStore({
 // default: the token is saved in the session (can be set to cookie)-
 const csrfProtection = csrf();
 
+const fileStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const err = null;
+        const folder = './images';
+        cb(err, folder);
+    },
+    filename: (req, file, cb) => {
+        const err = null;
+        cb(err, `${new Date().toISOString()}-${file.originalname}`);
+    },
+});
+
+const fileFilter = (req, file, cb) => {
+    // only accept png, jpg and jpeg files
+    if (
+        file.mimetype === 'image/png' ||
+        file.mimetype === 'image/jpg' ||
+        file.mimetype === 'image/jpeg'
+    ) {
+        cb(null, true);
+    } else {
+        cb(null, false);
+    }
+};
+
 app.set('view engine', 'ejs');
 
 // use html views stored in the views folder
@@ -35,11 +61,18 @@ app.set('views', 'views');
 // text parser
 // npm install --save body-parser
 app.use(bodyParser.urlencoded({ extended: false }));
-
+// to make multer read the input and store it in the "./images" folder
+app.use(
+    multer({
+        storage: fileStorage,
+        fileFilter: fileFilter,
+    }).single('image')
+);
 // middleware that allows us to serve static files (forwarded directly from the filesystem)
 // gives read access to the root path
 app.use(express.static(path.join(__dirname, 'public')));
 // can register multiple static folders, it will go through all of them until it gets a match
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use(
     session({
