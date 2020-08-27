@@ -8,6 +8,7 @@ import Paginator from '../../components/Paginator/Paginator';
 import Loader from '../../components/Loader/Loader';
 import ErrorHandler from '../../components/ErrorHandler/ErrorHandler';
 import './Feed.css';
+import config from "../../config";
 
 class Feed extends Component {
   state = {
@@ -50,7 +51,7 @@ class Feed extends Component {
       page--;
       this.setState({ postPage: page });
     }
-    fetch('URL')
+    fetch(`${config.backend}/feed/posts`)
       .then(res => {
         if (res.status !== 200) {
           throw new Error('Failed to fetch posts.');
@@ -88,7 +89,7 @@ class Feed extends Component {
 
   startEditPostHandler = postId => {
     this.setState(prevState => {
-      const loadedPost = { ...prevState.posts.find(p => p._id === postId) };
+      const loadedPost = { ...prevState.posts.find(p => p.id === postId) };
 
       return {
         isEditing: true,
@@ -120,7 +121,7 @@ class Feed extends Component {
       })
       .then(resData => {
         const post = {
-          _id: resData.post._id,
+          id: resData.post.id,
           title: resData.post.title,
           content: resData.post.content,
           creator: resData.post.creator,
@@ -130,7 +131,7 @@ class Feed extends Component {
           let updatedPosts = [...prevState.posts];
           if (prevState.editPost) {
             const postIndex = prevState.posts.findIndex(
-              p => p._id === prevState.editPost._id
+              p => p.id === prevState.editPost.id
             );
             updatedPosts[postIndex] = post;
           } else if (prevState.posts.length < 2) {
@@ -171,7 +172,7 @@ class Feed extends Component {
       .then(resData => {
         console.log(resData);
         this.setState(prevState => {
-          const updatedPosts = prevState.posts.filter(p => p._id !== postId);
+          const updatedPosts = prevState.posts.filter(p => p.id !== postId);
           return { posts: updatedPosts, postsLoading: false };
         });
       })
@@ -237,15 +238,15 @@ class Feed extends Component {
             >
               {this.state.posts.map(post => (
                 <Post
-                  key={post._id}
-                  id={post._id}
+                  key={post.id}
+                  id={post.id}
                   author={post.creator.name}
                   date={new Date(post.createdAt).toLocaleDateString('en-US')}
                   title={post.title}
                   image={post.imageUrl}
                   content={post.content}
-                  onStartEdit={this.startEditPostHandler.bind(this, post._id)}
-                  onDelete={this.deletePostHandler.bind(this, post._id)}
+                  onStartEdit={this.startEditPostHandler.bind(this, post.id)}
+                  onDelete={this.deletePostHandler.bind(this, post.id)}
                 />
               ))}
             </Paginator>
