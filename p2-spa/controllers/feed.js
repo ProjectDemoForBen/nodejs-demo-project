@@ -1,34 +1,30 @@
-const { validationResult } = require('express-validator');
+const {validationResult} = require('express-validator');
+
+const Post = require('../models/post');
+const User = require("../models/user");
 
 exports.getPosts = (req, res, next) => {
-    res.status(200).json({
-        posts: [
-            {
-                id: 1,
-                title: 'First Post',
-                content: 'This is the first post',
-                creator: {
-                    name: 'Marcelo Cardozo',
-                },
-                imageUrl: '/images/2020-08-07_20-23.png',
-                createdAt: new Date().toISOString(),
-            }
-        ],
-        totalItems: 1,
-    });
+    Post.findAll({
+        include: [
+            {model: User, as: 'creator'}
+        ]
+    }).then(result => {
+        res.status(200).json({
+            posts: result,
+            totalItems: result.length,
+        });
+    })
 }
 
 
 exports.createPost = (req, res, next) => {
     const errors = validationResult(req);
-    if(!errors.isEmpty()){
+    if (!errors.isEmpty()) {
         return res.status(422).json({
             message: 'Validation failed!',
             errors: errors.array(),
         })
     }
-
-
     const {title, content} = req.body;
 
     res.status(201).json({
@@ -43,4 +39,6 @@ exports.createPost = (req, res, next) => {
             createdAt: new Date().toISOString(),
         }
     });
+
+
 }
