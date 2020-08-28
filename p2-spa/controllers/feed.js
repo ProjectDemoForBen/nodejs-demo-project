@@ -20,10 +20,9 @@ exports.getPosts = (req, res, next) => {
 exports.createPost = (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(422).json({
-            message: 'Validation failed!',
-            errors: errors.array(),
-        })
+        const error = new Error('Validation failed!');
+        error.statusCode = 422;
+        throw error;
     }
     const {title, content} = req.body;
 
@@ -37,6 +36,8 @@ exports.createPost = (req, res, next) => {
             message: 'Post created!',
             post: {...post.dataValues, creator: req.user},
         });
+    }).catch(err => {
+        next(err);
     })
 
 

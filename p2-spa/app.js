@@ -38,6 +38,15 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use('/feed', feedRoutes);
 
+app.use((err, req, res, next) => {
+    const statusCode = err.statusCode || 500;
+    const message = err.message;
+
+    return res.status(statusCode).json({
+        message: message,
+    })
+})
+
 User.hasMany(Post, {
     foreignKey: {
         name: 'creatorId',
