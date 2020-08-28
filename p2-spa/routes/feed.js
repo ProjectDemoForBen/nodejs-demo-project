@@ -5,6 +5,7 @@ const feedController = require('../controllers/feed');
 
 const router = express.Router();
 
+router.get('/posts/:postId', feedController.getPost);
 router.get('/posts', feedController.getPosts);
 router.post('/posts', [
     body('title', 'Title should have at least 5 characters').trim().isLength({min: 5}),

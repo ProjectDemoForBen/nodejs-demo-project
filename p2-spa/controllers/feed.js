@@ -3,6 +3,27 @@ const {validationResult} = require('express-validator');
 const Post = require('../models/post');
 const User = require("../models/user");
 
+exports.getPost = (req, res, next) => {
+    const {postId} = req.params;
+
+    Post.findByPk(postId, {
+        include: [
+            {model: User, as: 'creator'}
+        ]
+    }).then(post => {
+        if(!post){
+            const err = new Error('Post not found');
+            err.statusCode = 404;
+            throw err;
+        }
+        res.status(200).json({
+            post
+        });
+    }).catch(err => {
+        next(err);
+    })
+}
+
 exports.getPosts = (req, res, next) => {
     Post.findAll({
         include: [
@@ -13,6 +34,8 @@ exports.getPosts = (req, res, next) => {
             posts: result,
             totalItems: result.length,
         });
+    }).catch(err => {
+        next(err);
     })
 }
 
