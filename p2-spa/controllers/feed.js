@@ -27,18 +27,17 @@ exports.createPost = (req, res, next) => {
     }
     const {title, content} = req.body;
 
-    res.status(201).json({
-        message: 'Post created!',
-        post: {
-            id: new Date().toISOString(),
-            title,
-            content,
-            creator: {
-                name: 'Marcelo Cardozo',
-            },
-            createdAt: new Date().toISOString(),
-        }
-    });
+    req.user.createPost({
+        title,
+        content,
+        imageUrl: '/images/2020-08-07_20-23.png',
+    }).then(post => {
+
+        res.status(201).json({
+            message: 'Post created!',
+            post: {...post.dataValues, creator: req.user},
+        });
+    })
 
 
 }

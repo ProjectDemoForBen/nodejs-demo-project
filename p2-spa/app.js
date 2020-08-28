@@ -40,7 +40,7 @@ app.use('/feed', feedRoutes);
 
 User.hasMany(Post, {
     foreignKey: {
-        name: 'userId',
+        name: 'creatorId',
         allowNull: false
     }
 });
@@ -49,7 +49,7 @@ Post.belongsTo(User, {
     constraints: true,
     onDelete: 'CASCADE',
     foreignKey: {
-        name: 'userId',
+        name: 'creatorId',
         allowNull: false
     }
 });
