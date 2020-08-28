@@ -1,0 +1,18 @@
+version: '3.3'
+services:
+  db:
+    container_name: node-p2-spa
+    image: mysql:5.7.30
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'messages'
+      MYSQL_USER: 'root'
+      MYSQL_PASSWORD: '1234'
+      MYSQL_ROOT_PASSWORD: '1234'
+    ports:
+      - '3306:3306'
+    volumes:
+      - node-p2-spa:/var/lib/mysql
+
+volumes:
+  node-p2-spa:
