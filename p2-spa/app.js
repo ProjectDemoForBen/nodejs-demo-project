@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 
 const feedRoutes = require('./routes/feed');
 const authRoutes = require('./routes/auth');
+const userRoutes = require('./routes/user');
 const sequelize = require('./utils/database');
 const Post = require('./models/post');
 const User = require('./models/user');
@@ -63,6 +64,7 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use('/feed', feedRoutes);
 app.use('/auth', authRoutes);
+app.use('/users', userRoutes);
 
 app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;
