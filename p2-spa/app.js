@@ -2,8 +2,10 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const multer = require("multer");
+const {v4: uuidv4} = require('uuid')
 
 const feedRoutes = require('./routes/feed');
+const authRoutes = require('./routes/auth');
 const sequelize = require('./utils/database');
 const Post = require('./models/post');
 const User = require('./models/user');
@@ -18,7 +20,7 @@ const fileStorage = multer.diskStorage({
     },
     filename: (req, file, cb) => {
         const err = null;
-        cb(err, `${new Date().toISOString()}-${file.originalname}`);
+        cb(err, uuidv4());
     },
 });
 
@@ -69,13 +71,14 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 
 
 app.use('/feed', feedRoutes);
+app.use('/auth', authRoutes);
 
 app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;
-    const message = err.message;
 
     return res.status(statusCode).json({
-        message: message,
+        message: err.message,
+        data: err.data,
     })
 })
 
@@ -108,6 +111,9 @@ sequelize
         } else {
             return User.create({
                 name: 'Marcelo Cardozo',
+                email: 'marcelo.r.cardozo.g@gmail.com',
+                password: 'password',
+                status: ''
             })
         }
     })
