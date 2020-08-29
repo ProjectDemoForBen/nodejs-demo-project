@@ -2,6 +2,7 @@ const {validationResult} = require('express-validator');
 
 const Post = require('../models/post');
 const User = require("../models/user");
+const {removeFile} = require("../utils/fileHelper");
 
 exports.getPost = (req, res, next) => {
     const {postId} = req.params;
@@ -69,6 +70,42 @@ exports.createPost = (req, res, next) => {
     }).catch(err => {
         next(err);
     })
+}
 
+exports.updatePost = (req, res, next) => {
+    const {postId} = req.params;
+    const {title, content} = req.body;
+    let imageUrl = req.body.image;
+    if (req.file) {
+        imageUrl = req.file.path;
+    }
+    if (!imageUrl) {
+        const err = new Error("No image uploaded");
+        err.statusCode = 422;
+        throw err;
+    }
 
+    Post.findByPk(postId).then(post => {
+        if (!post) {
+            const err = new Error('Post not found');
+            err.statusCode = 404;
+            throw err;
+        }
+        if(post.imageUrl && post.imageUrl !== imageUrl){
+            removeFile(post.imageUrl);
+        }
+
+        post.title = title;
+        post.content = content;
+        post.imageUrl = imageUrl;
+
+        return post.save();
+    }).then(post => {
+        return res.status(200).json({
+            message: 'Post updated',
+            post: {...post.dataValues, creator: req.user},
+        });
+    }).catch(err => {
+        next(err);
+    })
 }
