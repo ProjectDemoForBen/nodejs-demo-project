@@ -109,3 +109,24 @@ exports.updatePost = (req, res, next) => {
         next(err);
     })
 }
+
+
+exports.deletePost = (req, res, next) => {
+    const {postId} = req.params;
+
+    Post.findByPk(postId).then(post => {
+        if (!post) {
+            const err = new Error('Post not found');
+            err.statusCode = 404;
+            throw err;
+        }
+        removeFile(post.imageUrl);
+        return post.destroy();
+    }).then(result => {
+        res.status(200).json({
+            message: 'Post deleted',
+        })
+    }).catch(err => {
+        next(err);
+    })
+}
