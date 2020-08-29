@@ -106,7 +106,11 @@ class Feed extends Component {
     this.setState({
       editLoading: true
     });
-    // Set up data (with image!)
+    const formData = new FormData();
+    formData.append('title', postData.title);
+    formData.append('content', postData.content);
+    formData.append('image', postData.image);
+
     let url = `${config.backend}/feed/posts`;
     let method = 'POST';
     if (this.state.editPost) {
@@ -115,13 +119,7 @@ class Feed extends Component {
 
     fetch(url, {
       method: method,
-      body: JSON.stringify({
-        title: postData.title,
-        content: postData.content,
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      }
+      body: formData
     })
       .then(res => {
         if (res.status !== 200 && res.status !== 201) {
@@ -135,7 +133,8 @@ class Feed extends Component {
           title: resData.post.title,
           content: resData.post.content,
           creator: resData.post.creator,
-          createdAt: resData.post.createdAt
+          createdAt: resData.post.createdAt,
+          imageUrl: resData.post.imageUrl,
         };
         this.setState(prevState => {
           let updatedPosts = [...prevState.posts];
