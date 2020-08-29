@@ -2,7 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const multer = require("multer");
-const {v4: uuidv4} = require('uuid')
+const {v4: uuidv4} = require('uuid');
+const jwt = require('jsonwebtoken');
 
 const feedRoutes = require('./routes/feed');
 const authRoutes = require('./routes/auth');
@@ -49,22 +50,12 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
 
     // methods that client can request
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
 
     // headers that client can add to the request (there are default headers that are always allowed)
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
     next();
-})
-app.use((req, res, next) => {
-    User.findByPk(1)
-        .then(user => {
-            req.user = user;
-            next();
-        })
-        .catch(err => {
-            next();
-        });
 })
 
 app.use('/images', express.static(path.join(__dirname, 'images')));
@@ -100,39 +91,8 @@ Post.belongsTo(User, {
 
 
 sequelize
-    .sync({force: true})
+    .sync()
     .then(result => {
-        console.log(result);
-        return User.findByPk(1);
-    })
-    .then(user => {
-        if (user) {
-            return Promise.resolve(user);
-        } else {
-            return User.create({
-                name: 'Marcelo Cardozo',
-                email: 'marcelo.r.cardozo.g@gmail.com',
-                password: 'password',
-                status: ''
-            })
-        }
-    })
-    .then(user => {
-        return user.getPosts()
-            .then(posts => {
-                console.log(posts);
-                if (posts.length === 0) {
-                    return user.createPost({
-                        title: 'Prueba',
-                        content: 'Content prueba',
-                        imageUrl: 'images/2020-08-07_20-23.png'
-                    });
-                } else {
-                    return Promise.resolve(posts[0]);
-                }
-            })
-    })
-    .then(post => {
         app.listen(8080);
     })
     .catch(err => {

@@ -7,7 +7,7 @@ const authController = require('../controllers/auth');
 const router = express.Router();
 
 router.post('/signup', [
-    body('email', 'Enter a valid gmail email')
+    body('email', 'Enter a valid email')
         .isEmail()
         .custom((value, {req}) => {
             return User.count({
@@ -29,5 +29,15 @@ router.post('/signup', [
         .isLength({min: 5})
         .notEmpty()
 ], authController.signup);
+
+router.post('/login', [
+    body('email', 'Enter a valid email')
+        .isEmail()
+        .normalizeEmail(),
+    body('password', 'Password should have at least 5 characters')
+        .isLength({min: 5})
+        .notEmpty()
+], authController.login);
+
 
 module.exports = router;
