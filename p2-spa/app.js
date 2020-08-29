@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
+const multer = require("multer");
 
 const feedRoutes = require('./routes/feed');
 const sequelize = require('./utils/database');
@@ -9,7 +10,38 @@ const User = require('./models/user');
 
 const app = express();
 
+const fileStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const err = null;
+        const folder = './images';
+        cb(err, folder);
+    },
+    filename: (req, file, cb) => {
+        const err = null;
+        cb(err, `${new Date().toISOString()}-${file.originalname}`);
+    },
+});
+
+const fileFilter = (req, file, cb) => {
+    // only accept png, jpg and jpeg files
+    if (
+      file.mimetype === 'image/png' ||
+      file.mimetype === 'image/jpg' ||
+      file.mimetype === 'image/jpeg'
+    ) {
+        cb(null, true);
+    } else {
+        cb(null, false);
+    }
+};
+
 app.use(bodyParser.json());
+app.use(
+  multer({
+      storage: fileStorage,
+      fileFilter: fileFilter,
+  }).single('image')
+);
 app.use((req, res, next) => {
     // set all domains that could do request to server. * every domain
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -87,7 +119,7 @@ sequelize
                     return user.createPost({
                         title: 'Prueba',
                         content: 'Content prueba',
-                        imageUrl: '/images/2020-08-07_20-23.png'
+                        imageUrl: 'images/2020-08-07_20-23.png'
                     });
                 } else {
                     return Promise.resolve(posts[0]);

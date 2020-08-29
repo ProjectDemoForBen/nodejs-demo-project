@@ -11,7 +11,7 @@ exports.getPost = (req, res, next) => {
             {model: User, as: 'creator'}
         ]
     }).then(post => {
-        if(!post){
+        if (!post) {
             const err = new Error('Post not found');
             err.statusCode = 404;
             throw err;
@@ -47,14 +47,21 @@ exports.createPost = (req, res, next) => {
         error.statusCode = 422;
         throw error;
     }
+
+    if (!req.file) {
+        const error = new Error('No image provided!');
+        error.statusCode = 422;
+        throw error;
+    }
+
+    const imageUrl = req.file.path;
     const {title, content} = req.body;
 
     req.user.createPost({
         title,
         content,
-        imageUrl: '/images/2020-08-07_20-23.png',
+        imageUrl,
     }).then(post => {
-
         res.status(201).json({
             message: 'Post created!',
             post: {...post.dataValues, creator: req.user},
