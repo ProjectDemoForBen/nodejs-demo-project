@@ -26,14 +26,18 @@ exports.getPost = (req, res, next) => {
 }
 
 exports.getPosts = (req, res, next) => {
-    Post.findAll({
+    const page = req.query.page || 1;
+    const pageSize = 2;
+    Post.findAndCountAll({
         include: [
             {model: User, as: 'creator'}
-        ]
+        ],
+        limit: pageSize,
+        offset: (page - 1) * pageSize,
     }).then(result => {
         res.status(200).json({
-            posts: result,
-            totalItems: result.length,
+            posts: result.rows,
+            totalItems: result.count,
         });
     }).catch(err => {
         next(err);
@@ -91,7 +95,7 @@ exports.updatePost = (req, res, next) => {
             err.statusCode = 404;
             throw err;
         }
-        if(post.imageUrl && post.imageUrl !== imageUrl){
+        if (post.imageUrl && post.imageUrl !== imageUrl) {
             removeFile(post.imageUrl);
         }
 
