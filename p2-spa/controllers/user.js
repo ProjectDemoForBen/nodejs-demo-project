@@ -1,43 +1,41 @@
 const User = require('../models/user')
 
-exports.getStatus = (req, res, next) => {
+exports.getStatus = async (req, res, next) => {
     const {userId} = req.params;
 
-    User.findByPk(userId)
-        .then(user => {
-            if (!user) {
-                const err = new Error('User not found');
-                err.statusCode = 400;
-                throw err
-            }
-            return res.status(200).json({
-                status: user.status,
-            })
+    try {
+        const user = await User.findByPk(userId);
+        if (!user) {
+            const err = new Error('User not found');
+            err.statusCode = 400;
+            throw err
+        }
+        return res.status(200).json({
+            status: user.status,
         })
-        .catch(err => {
-            next(err);
-        })
+    } catch (err) {
+        return next(err);
+    }
 }
 
-exports.updateStatus = (req, res, next) => {
+exports.updateStatus = async (req, res, next) => {
     const {userId} = req.params;
     if (parseInt(userId) !== req.user.id) {
         const err = new Error('User not authorized');
         err.statusCode = 401;
-        throw err
+        return next(err);
     }
 
     const {status} = req.body;
 
     req.user.status = status;
-    req.user
-        .save()
-        .then(result => {
-            return res.status(200).json({
-                message: 'Status updated'
-            })
+    try {
+        await req.user.save()
+        return res.status(200).json({
+            message: 'Status updated'
         })
-        .catch(err => {
-            next(err);
-        })
+    } catch (err) {
+        return next(err);
+    }
+
 }

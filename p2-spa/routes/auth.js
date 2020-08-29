@@ -9,6 +9,7 @@ const router = express.Router();
 router.post('/signup', [
     body('email', 'Enter a valid email')
         .isEmail()
+        .normalizeEmail()
         .custom((value, {req}) => {
             return User.count({
                 where: {
@@ -18,10 +19,8 @@ router.post('/signup', [
                 if (count > 0) {
                     return Promise.reject('Email already exists');
                 }
-                return true;
             })
-        })
-        .normalizeEmail(),
+        }),
     body('name', 'Name should not be empty')
         .trim()
         .notEmpty(),

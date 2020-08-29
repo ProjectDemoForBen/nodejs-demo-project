@@ -4,14 +4,16 @@ const Post = require('../models/post');
 const User = require("../models/user");
 const {removeFile} = require("../utils/fileHelper");
 
-exports.getPost = (req, res, next) => {
+exports.getPost = async (req, res, next) => {
     const {postId} = req.params;
 
-    Post.findByPk(postId, {
-        include: [
-            {model: User, as: 'creator'}
-        ]
-    }).then(post => {
+    try {
+        const post = await Post.findByPk(postId, {
+            include: [
+                {model: User, as: 'creator'}
+            ]
+        })
+
         if (!post) {
             const err = new Error('Post not found');
             err.statusCode = 404;
@@ -20,64 +22,69 @@ exports.getPost = (req, res, next) => {
         res.status(200).json({
             post
         });
-    }).catch(err => {
+
+    } catch (err) {
         next(err);
-    })
+    }
 }
 
-exports.getPosts = (req, res, next) => {
+exports.getPosts = async (req, res, next) => {
     const page = req.query.page || 1;
     const pageSize = 2;
-    Post.findAndCountAll({
-        include: [
-            {model: User, as: 'creator'}
-        ],
-        limit: pageSize,
-        offset: (page - 1) * pageSize,
-    }).then(result => {
+
+    try {
+        const result = await Post.findAndCountAll({
+            include: [
+                {model: User, as: 'creator'}
+            ],
+            limit: pageSize,
+            offset: (page - 1) * pageSize,
+        });
         res.status(200).json({
             posts: result.rows,
             totalItems: result.count,
         });
-    }).catch(err => {
+    } catch (err) {
         next(err);
-    })
+    }
 }
 
 
-exports.createPost = (req, res, next) => {
+exports.createPost = async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         const error = new Error('Validation failed!');
         error.statusCode = 422;
         error.data = errors.array();
-        throw error;
+        return next(error);
     }
 
     if (!req.file) {
         const error = new Error('No image provided!');
         error.statusCode = 422;
-        throw error;
+        return next(error);
     }
 
     const imageUrl = req.file.path;
     const {title, content} = req.body;
 
-    req.user.createPost({
-        title,
-        content,
-        imageUrl,
-    }).then(post => {
+    try {
+        const post = await req.user.createPost({
+            title,
+            content,
+            imageUrl,
+        });
+
         res.status(201).json({
             message: 'Post created!',
             post: {...post.dataValues, creator: req.user},
         });
-    }).catch(err => {
+    } catch (err) {
         next(err);
-    })
+    }
 }
 
-exports.updatePost = (req, res, next) => {
+exports.updatePost = async (req, res, next) => {
     const {postId} = req.params;
     const {title, content} = req.body;
     let imageUrl = req.body.image;
@@ -87,10 +94,12 @@ exports.updatePost = (req, res, next) => {
     if (!imageUrl) {
         const err = new Error("No image uploaded");
         err.statusCode = 422;
-        throw err;
+        return next(err);
     }
 
-    Post.findByPk(postId).then(post => {
+    try {
+        let post = await Post.findByPk(postId);
+
         if (!post) {
             const err = new Error('Post not found');
             err.statusCode = 404;
@@ -110,22 +119,24 @@ exports.updatePost = (req, res, next) => {
         post.content = content;
         post.imageUrl = imageUrl;
 
-        return post.save();
-    }).then(post => {
+        post = await post.save();
+
         return res.status(200).json({
             message: 'Post updated',
             post: {...post.dataValues, creator: req.user},
         });
-    }).catch(err => {
-        next(err);
-    })
+    } catch (err) {
+        return next(err);
+    }
 }
 
 
-exports.deletePost = (req, res, next) => {
+exports.deletePost = async (req, res, next) => {
     const {postId} = req.params;
 
-    Post.findByPk(postId).then(post => {
+    try {
+        const post = await Post.findByPk(postId);
+
         if (!post) {
             const err = new Error('Post not found');
             err.statusCode = 404;
@@ -137,12 +148,13 @@ exports.deletePost = (req, res, next) => {
             throw err;
         }
         removeFile(post.imageUrl);
-        return post.destroy();
-    }).then(result => {
+
+        await post.destroy();
+
         res.status(200).json({
             message: 'Post deleted',
         })
-    }).catch(err => {
+    } catch (err) {
         next(err);
-    })
+    }
 }
