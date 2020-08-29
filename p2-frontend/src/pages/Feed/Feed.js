@@ -23,7 +23,11 @@ class Feed extends Component {
   };
 
   componentDidMount() {
-    fetch('URL')
+    fetch(`${config.backend}/users/${this.props.userId}/status`, {
+      headers: {
+        'Authorization': `Bearer ${this.props.token}`
+      },
+    })
       .then(res => {
         if (res.status !== 200) {
           throw new Error('Failed to fetch user status.');
@@ -51,7 +55,11 @@ class Feed extends Component {
       page--;
       this.setState({ postPage: page });
     }
-    fetch(`${config.backend}/feed/posts`)
+    fetch(`${config.backend}/feed/posts?page=${page}`, {
+      headers: {
+        'Authorization': `Bearer ${this.props.token}`
+      },
+    })
       .then(res => {
         if (res.status !== 200) {
           throw new Error('Failed to fetch posts.');
@@ -70,7 +78,16 @@ class Feed extends Component {
 
   statusUpdateHandler = event => {
     event.preventDefault();
-    fetch('URL')
+    fetch(`${config.backend}/users/${this.props.userId}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        status: this.state.status,
+      }),
+      headers: {
+        'Authorization': `Bearer ${this.props.token}`,
+        'Content-Type': 'application/json',
+      },
+    })
       .then(res => {
         if (res.status !== 200 && res.status !== 201) {
           throw new Error("Can't update status!");
@@ -114,12 +131,16 @@ class Feed extends Component {
     let url = `${config.backend}/feed/posts`;
     let method = 'POST';
     if (this.state.editPost) {
-      url = 'URL';
+      url = `${config.backend}/feed/posts/${this.state.editPost.id}`;
+      method = 'PUT';
     }
 
     fetch(url, {
       method: method,
-      body: formData
+      body: formData,
+      headers: {
+        'Authorization': `Bearer ${this.props.token}`
+      },
     })
       .then(res => {
         if (res.status !== 200 && res.status !== 201) {
@@ -171,7 +192,12 @@ class Feed extends Component {
 
   deletePostHandler = postId => {
     this.setState({ postsLoading: true });
-    fetch('URL')
+    fetch(`${config.backend}/feed/posts/${postId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${this.props.token}`
+      },
+    })
       .then(res => {
         if (res.status !== 200 && res.status !== 201) {
           throw new Error('Deleting a post failed!');

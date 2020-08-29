@@ -17,10 +17,11 @@ class SinglePost extends Component {
     const postId = this.props.match.params.postId;
     const url = `${config.backend}/feed/posts/${postId}`
     fetch(url, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-      }
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${this.props.token}`
+        }
     })
       .then(res => {
         if (res.status !== 200) {
