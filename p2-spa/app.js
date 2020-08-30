@@ -3,11 +3,12 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const multer = require("multer");
 const {v4: uuidv4} = require('uuid');
-const jwt = require('jsonwebtoken');
+const {graphqlHTTP} = require('express-graphql');
 
-const feedRoutes = require('./routes/feed');
-const authRoutes = require('./routes/auth');
-const userRoutes = require('./routes/user');
+
+const graphqlSchema = require('./graphql/schema');
+const graphqlResolver = require('./graphql/resolvers');
+
 const sequelize = require('./utils/database');
 const Post = require('./models/post');
 const User = require('./models/user');
@@ -60,11 +61,10 @@ app.use((req, res, next) => {
 })
 
 app.use('/images', express.static(path.join(__dirname, 'images')));
-
-
-app.use('/feed', feedRoutes);
-app.use('/auth', authRoutes);
-app.use('/users', userRoutes);
+app.use('/graphql', graphqlHTTP({
+    schema: graphqlSchema,
+    rootValue: graphqlResolver,
+}))
 
 app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;
@@ -95,18 +95,7 @@ Post.belongsTo(User, {
 sequelize
     .sync()
     .then(result => {
-        const server = app.listen(8080);
-
-        // socketio object
-        const io = require('./socket').init(server);
-
-        // set up event listener
-        // on client connected
-        io.on('connection', socket => {
-            console.log('Client connected');
-        })
-
-
+        app.listen(8080);
     })
     .catch(err => {
         console.log(err);
