@@ -29,9 +29,9 @@ const fileStorage = multer.diskStorage({
 const fileFilter = (req, file, cb) => {
     // only accept png, jpg and jpeg files
     if (
-      file.mimetype === 'image/png' ||
-      file.mimetype === 'image/jpg' ||
-      file.mimetype === 'image/jpeg'
+        file.mimetype === 'image/png' ||
+        file.mimetype === 'image/jpg' ||
+        file.mimetype === 'image/jpeg'
     ) {
         cb(null, true);
     } else {
@@ -41,10 +41,10 @@ const fileFilter = (req, file, cb) => {
 
 app.use(bodyParser.json());
 app.use(
-  multer({
-      storage: fileStorage,
-      fileFilter: fileFilter,
-  }).single('image')
+    multer({
+        storage: fileStorage,
+        fileFilter: fileFilter,
+    }).single('image')
 );
 app.use((req, res, next) => {
     // set all domains that could do request to server. * every domain
@@ -95,7 +95,18 @@ Post.belongsTo(User, {
 sequelize
     .sync()
     .then(result => {
-        app.listen(8080);
+        const server = app.listen(8080);
+
+        // socketio object
+        const io = require('./socket').init(server);
+
+        // set up event listener
+        // on client connected
+        io.on('connection', socket => {
+            console.log('Client connected');
+        })
+
+
     })
     .catch(err => {
         console.log(err);

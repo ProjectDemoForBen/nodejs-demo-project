@@ -3,6 +3,8 @@ const {validationResult} = require('express-validator');
 const Post = require('../models/post');
 const User = require("../models/user");
 const {removeFile} = require("../utils/fileHelper");
+const io = require('../socket');
+
 
 exports.getPost = async (req, res, next) => {
     const {postId} = req.params;
@@ -39,6 +41,7 @@ exports.getPosts = async (req, res, next) => {
             ],
             limit: pageSize,
             offset: (page - 1) * pageSize,
+            order: [['createdAt', 'DESC']]
         });
         res.status(200).json({
             posts: result.rows,
@@ -75,9 +78,18 @@ exports.createPost = async (req, res, next) => {
             imageUrl,
         });
 
+        const postData = {...post.dataValues, creator: req.user};
+
+        // channel: posts
+        // action: create
+        io.getIO().emit('posts', {
+            action: 'create',
+            data: postData
+        });
+
         res.status(201).json({
             message: 'Post created!',
-            post: {...post.dataValues, creator: req.user},
+            post: postData
         });
     } catch (err) {
         next(err);
@@ -121,6 +133,12 @@ exports.updatePost = async (req, res, next) => {
 
         post = await post.save();
 
+        const postData = {...post.dataValues, creator: req.user};
+        io.getIO().emit('posts', {
+            action: 'update',
+            data: postData
+        });
+
         return res.status(200).json({
             message: 'Post updated',
             post: {...post.dataValues, creator: req.user},
@@ -150,6 +168,11 @@ exports.deletePost = async (req, res, next) => {
         removeFile(post.imageUrl);
 
         await post.destroy();
+
+        io.getIO().emit('posts', {
+            action: 'delete',
+            data: postId
+        });
 
         res.status(200).json({
             message: 'Post deleted',
