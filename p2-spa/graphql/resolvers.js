@@ -1,7 +1,9 @@
 const bcrypt = require('bcryptjs');
 const validator = require('validator');
+const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
+const config = require("../utils/config");
 
 // a function for every query/mutation defined in the schema, the name has to match
 module.exports = {
@@ -53,5 +55,32 @@ module.exports = {
 
         return {...user.dataValues, posts: []}
 
+    },
+    login: async function (args, req) {
+        const {email, password} = args;
+
+        const user = await User.findOne({
+            where: {
+                email: email
+            }
+        })
+        if (!user) {
+            const err = new Error('Invalid Email or Password');
+            err.code = 400;
+            throw err;
+        }
+        const match = await bcrypt.compare(password, user.password)
+        if (!match) {
+            const err = new Error('Invalid Email or Password');
+            err.code = 400;
+            throw err;
+        }
+        const token = jwt.sign({
+            id: user.id,
+            email: user.email
+        }, config.jwtsecret, {expiresIn: '1h'})
+
+
+        return {token, userId: user.id};
     }
 }
