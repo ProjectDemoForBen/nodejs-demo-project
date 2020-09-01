@@ -130,35 +130,44 @@ class Feed extends Component {
     formData.append('content', postData.content);
     formData.append('image', postData.image);
 
-    let url = `${config.backend}/feed/posts`;
-    let method = 'POST';
-    if (this.state.editPost) {
-      url = `${config.backend}/feed/posts/${this.state.editPost.id}`;
-      method = 'PUT';
+    const graphqlQuery = {
+      query: `
+        mutation {
+          createPost(postInput: {title: "${postData.title}", content: "${postData.content}", imageUrl:"dummy"}){
+            id
+            title
+            content
+            creator {
+              name
+            }
+            createdAt
+            imageUrl
+          }
+        }
+      `
     }
 
-    fetch(url, {
-      method: method,
-      body: formData,
+    fetch(`${config.backend}/graphql`, {
+      method: 'POST',
+      body: JSON.stringify(graphqlQuery),
       headers: {
-        'Authorization': `Bearer ${this.props.token}`
+        'Authorization': `Bearer ${this.props.token}`,
+        'Content-Type': 'application/json',
       },
     })
       .then(res => {
-        if (res.status !== 200 && res.status !== 201) {
-          throw new Error('Creating or editing a post failed!');
-        }
         return res.json();
       })
       .then(resData => {
-        const post = {
-          id: resData.post.id,
-          title: resData.post.title,
-          content: resData.post.content,
-          creator: resData.post.creator,
-          createdAt: resData.post.createdAt,
-          imageUrl: resData.post.imageUrl,
-        };
+
+        if(resData.errors){
+          throw new Error('Creating or editing a post failed!');
+        }
+
+        const post = {...resData.data.createPost};
+
+        console.log(post);
+
         this.setState(prevState => {
           let updatedPosts = [...prevState.posts];
           if (prevState.editPost) {

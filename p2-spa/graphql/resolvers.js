@@ -82,5 +82,43 @@ module.exports = {
 
 
         return {token, userId: user.id};
+    },
+    createPost: async function (args, req) {
+        if(!req.isAuth){
+            const err = new Error('User is not authenticated');
+            err.code = 401;
+            throw err;
+        }
+
+        const {title, content, imageUrl} = args.postInput;
+
+        const errors = [];
+        if(!validator.isLength(title, {min: 5})){
+            errors.push({message: 'Title should have at least 5 characters'})
+        }
+        if(!validator.isLength(content, {min: 5})){
+            errors.push({message: 'Conten should have at least 5 characters'})
+        }
+        if(errors.length > 0){
+            const err = new Error('Invalid input');
+            err.data = errors;
+            err.code = 422;
+            throw err;
+        }
+
+        const user = await User.findByPk(req.userId);
+        if(!user){
+            const err = new Error('Invalid user');
+            err.code = 401;
+            throw err;
+        }
+
+        const post = await user.createPost({
+            title,
+            content,
+            imageUrl,
+        });
+
+        return {...post.dataValues, creator: user};
     }
 }

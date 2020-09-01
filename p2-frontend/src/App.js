@@ -91,16 +91,17 @@ class App extends Component {
           console.log('Error!');
           throw new Error('Could not authenticate you!');
         }
+        const {token, userId} = resData.data.login;
 
         console.log(resData);
         this.setState({
           isAuth: true,
-          token: resData.token,
+          token: token,
           authLoading: false,
-          userId: resData.userId
+          userId: userId
         });
-        localStorage.setItem('token', resData.token);
-        localStorage.setItem('userId', resData.userId);
+        localStorage.setItem('token', token);
+        localStorage.setItem('userId', userId);
         const remainingMilliseconds = 60 * 60 * 1000;
         const expiryDate = new Date(
           new Date().getTime() + remainingMilliseconds

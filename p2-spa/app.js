@@ -8,7 +8,7 @@ const {graphqlHTTP} = require('express-graphql');
 
 const graphqlSchema = require('./graphql/schema');
 const graphqlResolver = require('./graphql/resolvers');
-
+const auth = require('./middlewares/auth');
 const sequelize = require('./utils/database');
 const Post = require('./models/post');
 const User = require('./models/user');
@@ -64,6 +64,9 @@ app.use((req, res, next) => {
 })
 
 app.use('/images', express.static(path.join(__dirname, 'images')));
+
+app.use(auth);
+
 app.use('/graphql', graphqlHTTP({
     schema: graphqlSchema,
     rootValue: graphqlResolver,
