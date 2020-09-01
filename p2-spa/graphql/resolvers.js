@@ -1,9 +1,41 @@
-// a function for every query defined in the schema, the name has to match
+const bcrypt = require('bcryptjs');
+
+const User = require('../models/user');
+
+// a function for every query/mutation defined in the schema, the name has to match
 module.exports = {
-    hello() {
-        return {
-            text: 'Hello world!',
-            views: 145,
-        };
+
+    // the data defined in the schema is what the function must return
+    createUser: async function (args, req) {
+        // args: object containing all the arguments passed to the function
+        const {email, name, password} = args.userInput;
+
+        // return User.count().then()
+        // or
+        const count = await User.count({
+            where: {
+                email: email
+            }
+        });
+
+        if (count > 0) {
+            const err = new Error('Email already exists');
+            throw err;
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 12);
+        if (!hashedPassword) {
+            const err = new Error('Password could not be hashed');
+            throw err;
+        }
+
+        const user = await User.create({
+            name: name,
+            email: email,
+            password: hashedPassword,
+        });
+
+        return {...user.dataValues, posts: []}
+
     }
 }
