@@ -57,6 +57,9 @@ app.use((req, res, next) => {
     // headers that client can add to the request (there are default headers that are always allowed)
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
+    if (req.method === 'OPTIONS')
+        return res.sendStatus(200);
+
     next();
 })
 
