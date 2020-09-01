@@ -65,6 +65,18 @@ app.use('/graphql', graphqlHTTP({
     schema: graphqlSchema,
     rootValue: graphqlResolver,
     graphiql: true,
+    formatError(err) {
+        // error thrown was not explicitly written by the developer
+        if (!err.originalError) {
+            return err;
+        }
+
+        const data = err.originalError.data;
+        const message = err.message || 'An error ocurred';
+        const code = err.originalError.code || 500;
+
+        return {data, message, code}
+    }
 }))
 
 app.use((err, req, res, next) => {
