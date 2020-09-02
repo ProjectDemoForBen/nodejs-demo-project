@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const Post = require('../models/post');
 const User = require('../models/user');
 const config = require("../utils/config");
+const {removeFile} = require("../utils/fileHelper");
 
 // a function for every query/mutation defined in the schema, the name has to match
 module.exports = {
@@ -225,4 +226,44 @@ module.exports = {
 
         return {...post.dataValues, creator: user};
     },
+    deletePost: async function (args, req) {
+        if (!req.isAuth) {
+            const err = new Error('User is not authenticated');
+            err.code = 401;
+            throw err;
+        }
+        const {id} = args;
+
+        let post = await Post.findByPk(id, {
+            include: [
+                {model: User, as: 'creator'}
+            ]
+        });
+
+        if (!post) {
+            const err = new Error('Post not found');
+            err.code = 404;
+            throw err;
+        }
+
+        const user = await User.findByPk(req.userId);
+        if (!user) {
+            const err = new Error('Invalid user');
+            err.code = 401;
+            throw err;
+        }
+
+        if (post.creator.id !== user.id) {
+            const err = new Error('User not authorized');
+            err.code = 401;
+            throw err;
+        }
+
+        removeFile(post.imageUrl);
+
+        await post.destroy();
+
+        return true;
+    }
+
 }
