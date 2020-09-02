@@ -12,6 +12,7 @@ const auth = require('./middlewares/auth');
 const sequelize = require('./utils/database');
 const Post = require('./models/post');
 const User = require('./models/user');
+const {removeFile} = require("./utils/fileHelper");
 
 const app = express();
 
@@ -63,9 +64,34 @@ app.use((req, res, next) => {
     next();
 })
 
+app.use(auth);
+
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
-app.use(auth);
+app.put('/image', (req, res, next) => {
+    if(!req.isAuth){
+        const err = new Error('Not authenticated');
+        err.code = 401;
+        throw err;
+    }
+
+    const file = req.file;
+    if (!file) {
+        const err = new Error('No image found');
+        err.code = 400;
+        throw err;
+    }
+
+    if(req.body.oldPath){
+        removeFile(req.body.oldPath);
+    }
+
+    return res.status(201).json({
+        imageUrl: file.path,
+        message: 'File stored',
+    })
+})
+
 
 app.use('/graphql', graphqlHTTP({
     schema: graphqlSchema,

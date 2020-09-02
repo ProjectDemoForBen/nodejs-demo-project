@@ -151,36 +151,50 @@ class Feed extends Component {
       editLoading: true
     });
     const formData = new FormData();
-    formData.append('title', postData.title);
-    formData.append('content', postData.content);
     formData.append('image', postData.image);
 
-    const graphqlQuery = {
-      query: `
-        mutation {
-          createPost(postInput: {title: "${postData.title}", content: "${postData.content}", imageUrl:"dummy"}){
-            id
-            title
-            content
-            creator {
-              name
-            }
-            createdAt
-            imageUrl
-          }
-        }
-      `
+    if(this.state.editPost){
+      formData.append('oldPath', this.state.editPost.imageUrl);
     }
 
-    fetch(`${config.backend}/graphql`, {
-      method: 'POST',
-      body: JSON.stringify(graphqlQuery),
+    fetch(`${config.backend}/image`, {
+      method: 'PUT',
+      body: formData,
       headers: {
         'Authorization': `Bearer ${this.props.token}`,
-        'Content-Type': 'application/json',
       },
-    })
-      .then(res => {
+    }).then(res => {
+      return res.json();
+    }).then(resData => {
+
+      const {imageUrl} = resData;
+      const graphqlQuery = {
+        query: `
+          mutation {
+            createPost(postInput: {title: "${postData.title}", content: "${postData.content}", imageUrl:"${imageUrl}"}){
+              id
+              title
+              content
+              creator {
+                name
+              }
+              createdAt
+              imageUrl
+            }
+          }
+        `
+      }
+
+      return fetch(`${config.backend}/graphql`, {
+        method: 'POST',
+        body: JSON.stringify(graphqlQuery),
+        headers: {
+          'Authorization': `Bearer ${this.props.token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+    }).then(res => {
         return res.json();
       })
       .then(resData => {
