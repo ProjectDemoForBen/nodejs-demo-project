@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
 
+const Post = require('../models/post');
 const User = require('../models/user');
 const config = require("../utils/config");
 
@@ -84,7 +85,7 @@ module.exports = {
         return {token, userId: user.id};
     },
     createPost: async function (args, req) {
-        if(!req.isAuth){
+        if (!req.isAuth) {
             const err = new Error('User is not authenticated');
             err.code = 401;
             throw err;
@@ -93,13 +94,13 @@ module.exports = {
         const {title, content, imageUrl} = args.postInput;
 
         const errors = [];
-        if(!validator.isLength(title, {min: 5})){
+        if (!validator.isLength(title, {min: 5})) {
             errors.push({message: 'Title should have at least 5 characters'})
         }
-        if(!validator.isLength(content, {min: 5})){
+        if (!validator.isLength(content, {min: 5})) {
             errors.push({message: 'Conten should have at least 5 characters'})
         }
-        if(errors.length > 0){
+        if (errors.length > 0) {
             const err = new Error('Invalid input');
             err.data = errors;
             err.code = 422;
@@ -107,7 +108,7 @@ module.exports = {
         }
 
         const user = await User.findByPk(req.userId);
-        if(!user){
+        if (!user) {
             const err = new Error('Invalid user');
             err.code = 401;
             throw err;
@@ -120,5 +121,29 @@ module.exports = {
         });
 
         return {...post.dataValues, creator: user};
+    },
+    getPosts: async function (args, req) {
+        if (!req.isAuth) {
+            const err = new Error('User is not authenticated');
+            err.code = 401;
+            throw err;
+        }
+
+        const page = args.page || 1;
+        const pageSize = 2;
+
+        const result = await Post.findAndCountAll({
+            include: [
+                {model: User, as: 'creator'}
+            ],
+            limit: pageSize,
+            offset: (page - 1) * pageSize,
+            order: [['createdAt', 'DESC']]
+        });
+
+        return {
+            posts: result.rows,
+            totalItems: result.count,
+        }
     }
 }

@@ -57,21 +57,46 @@ class Feed extends Component {
       page--;
       this.setState({ postPage: page });
     }
-    fetch(`${config.backend}/feed/posts?page=${page}`, {
+    const graphqlQuery = {
+      query: `
+        {
+          getPosts(page: ${page}){
+            posts {
+              id
+              title
+              content
+              imageUrl
+              creator {
+                name
+              }
+              createdAt
+            }
+            totalItems
+          }
+        }
+      `
+    };
+
+
+    fetch(`${config.backend}/graphql`, {
+      method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this.props.token}`
+        'Authorization': `Bearer ${this.props.token}`,
+        'Content-Type': 'application/json'
       },
+      body: JSON.stringify(graphqlQuery),
     })
       .then(res => {
-        if (res.status !== 200) {
-          throw new Error('Failed to fetch posts.');
-        }
         return res.json();
       })
       .then(resData => {
+        if (resData.errors) {
+          throw new Error('Failed to fetch posts.');
+        }
+        console.log(resData);
         this.setState({
-          posts: resData.posts,
-          totalPosts: resData.totalItems,
+          posts: resData.data.getPosts.posts,
+          totalPosts: resData.data.getPosts.totalItems,
           postsLoading: false
         });
       })
@@ -169,16 +194,26 @@ class Feed extends Component {
         console.log(post);
 
         this.setState(prevState => {
+          let totalPosts = prevState.totalPosts;
+
           let updatedPosts = [...prevState.posts];
           if (prevState.editPost) {
-          } else if (prevState.posts.length < 2) {
-            updatedPosts = prevState.posts.concat(post);
+            const index = prevState.posts.findIndex(p => p.id === prevState.editPost.id);
+            updatedPosts[index] = post;
+          } else {
+              if (prevState.posts.length === 2) {
+                  updatedPosts.pop();
+              }
+              updatedPosts = [post, ...updatedPosts];
+
+              totalPosts += 1;
           }
           return {
             posts: updatedPosts,
             isEditing: false,
             editPost: null,
-            editLoading: false
+            editLoading: false,
+            totalPosts: totalPosts,
           };
         });
       })
