@@ -77,9 +77,9 @@ app.put('/image', (req, res, next) => {
 
     const file = req.file;
     if (!file) {
-        const err = new Error('No image found');
-        err.code = 400;
-        throw err;
+        return res.status(200).json({
+            message: 'No image found',
+        })
     }
 
     if(req.body.oldPath){

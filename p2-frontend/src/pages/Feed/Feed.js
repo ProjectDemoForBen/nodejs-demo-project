@@ -167,8 +167,8 @@ class Feed extends Component {
       return res.json();
     }).then(resData => {
 
-      const {imageUrl} = resData;
-      const graphqlQuery = {
+      const imageUrl = resData.imageUrl || this.state.editPost.imageUrl;
+      let graphqlQuery = {
         query: `
           mutation {
             createPost(postInput: {title: "${postData.title}", content: "${postData.content}", imageUrl:"${imageUrl}"}){
@@ -183,6 +183,27 @@ class Feed extends Component {
             }
           }
         `
+      }
+
+      if(this.state.editPost){
+        graphqlQuery = {
+          query: `
+            mutation {
+              updatePost(
+              id: ${this.state.editPost.id}, 
+              postInput: {title: "${postData.title}", content: "${postData.content}", imageUrl:"${imageUrl}"}){
+                id
+                title
+                content
+                creator {
+                  name
+                }
+                createdAt
+                imageUrl
+              }
+            }
+          `
+        }
       }
 
       return fetch(`${config.backend}/graphql`, {
@@ -203,7 +224,7 @@ class Feed extends Component {
           throw new Error('Creating or editing a post failed!');
         }
 
-        const post = {...resData.data.createPost};
+        const post = {...(resData.data.createPost || resData.data.updatePost)};
 
         console.log(post);
 

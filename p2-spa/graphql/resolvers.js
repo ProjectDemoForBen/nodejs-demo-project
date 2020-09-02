@@ -147,6 +147,12 @@ module.exports = {
         }
     },
     getPost: async function (args, req) {
+        if (!req.isAuth) {
+            const err = new Error('User is not authenticated');
+            err.code = 401;
+            throw err;
+        }
+
         const {id} = args;
 
         const post = await Post.findByPk(id, {
@@ -162,5 +168,61 @@ module.exports = {
         }
 
         return post;
-    }
+    },
+    updatePost: async function (args, req) {
+        if (!req.isAuth) {
+            const err = new Error('User is not authenticated');
+            err.code = 401;
+            throw err;
+        }
+        const {id, postInput} = args;
+        const {title, content, imageUrl} = postInput;
+
+        const errors = [];
+        if (!validator.isLength(title, {min: 5})) {
+            errors.push({message: 'Title should have at least 5 characters'})
+        }
+        if (!validator.isLength(content, {min: 5})) {
+            errors.push({message: 'Content should have at least 5 characters'})
+        }
+        if (errors.length > 0) {
+            const err = new Error('Invalid input');
+            err.data = errors;
+            err.code = 422;
+            throw err;
+        }
+
+        let post = await Post.findByPk(id, {
+            include: [
+                {model: User, as: 'creator'}
+            ]
+        });
+
+        if (!post) {
+            const err = new Error('Post not found');
+            err.code = 404;
+            throw err;
+        }
+
+        const user = await User.findByPk(req.userId);
+        if (!user) {
+            const err = new Error('Invalid user');
+            err.code = 401;
+            throw err;
+        }
+
+        if (post.creator.id !== user.id) {
+            const err = new Error('User not authorized');
+            err.code = 401;
+            throw err;
+        }
+
+        post.title = title;
+        post.content = content;
+        post.imageUrl = imageUrl;
+
+        post = await post.save();
+
+        return {...post.dataValues, creator: user};
+    },
 }
