@@ -23,19 +23,31 @@ class Feed extends Component {
   };
 
   componentDidMount() {
-    fetch(`${config.backend}/users/${this.props.userId}/status`, {
+    const graphqlQuery = {
+      query: `
+        {
+          getUserStatus(id: ${this.props.userId})      
+        }
+      `
+    }
+
+    fetch(`${config.backend}/graphql`, {
+      method: 'POST',
+      body: JSON.stringify(graphqlQuery),
       headers: {
-        'Authorization': `Bearer ${this.props.token}`
+        'Authorization': `Bearer ${this.props.token}`,
+        'Content-Type': 'application/json',
       },
     })
       .then(res => {
-        if (res.status !== 200) {
-          throw new Error('Failed to fetch user status.');
-        }
         return res.json();
       })
       .then(resData => {
-        this.setState({ status: resData.status });
+        if(resData.errors) {
+          throw new Error('Failed to fetch user status.');
+        }
+
+        this.setState({ status: resData.data.getUserStatus });
       })
       .catch(this.catchError);
 
@@ -105,24 +117,32 @@ class Feed extends Component {
 
   statusUpdateHandler = event => {
     event.preventDefault();
-    fetch(`${config.backend}/users/${this.props.userId}/status`, {
-      method: 'PATCH',
-      body: JSON.stringify({
-        status: this.state.status,
-      }),
+
+    const graphqlQuery = {
+      query: `
+        mutation {
+          updateStatus(id: ${this.props.userId}, status: "${this.state.status}")
+        }
+      `
+    };
+
+    fetch(`${config.backend}/graphql`, {
+      method: 'POST',
+      body: JSON.stringify(graphqlQuery),
       headers: {
         'Authorization': `Bearer ${this.props.token}`,
         'Content-Type': 'application/json',
       },
     })
       .then(res => {
-        if (res.status !== 200 && res.status !== 201) {
-          throw new Error("Can't update status!");
-        }
         return res.json();
       })
       .then(resData => {
         console.log(resData);
+
+        if (resData.errors) {
+          throw new Error("Can't update status!");
+        }
       })
       .catch(this.catchError);
   };

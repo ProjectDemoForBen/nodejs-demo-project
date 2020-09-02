@@ -264,6 +264,42 @@ module.exports = {
         await post.destroy();
 
         return true;
+    },
+    getUserStatus: async function (args, req) {
+        if (!req.isAuth) {
+            const err = new Error('User is not authenticated');
+            err.code = 401;
+            throw err;
+        }
+        const {id} = args;
+
+        const user = await User.findByPk(id);
+        if (!user) {
+            const err = new Error('Invalid user');
+            err.code = 401;
+            throw err;
+        }
+
+        return user.status;
+    },
+    updateStatus: async function (args, req) {
+        if (!req.isAuth) {
+            const err = new Error('User is not authenticated');
+            err.code = 401;
+            throw err;
+        }
+        const {id, status} = args;
+
+        if (parseInt(id) !== req.userId) {
+            const err = new Error('User not authorized');
+            err.code = 401;
+            throw err;
+        }
+        const user = await User.findByPk(req.userId);
+        user.status = status;
+        await user.save();
+
+        return true;
     }
 
 }
