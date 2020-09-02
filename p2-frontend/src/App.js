@@ -63,13 +63,17 @@ class App extends Component {
 
     const graphqlQuery = {
       query: `
-        {
-          login(email: "${authData.email}", password: "${authData.password}"){
+        query LoginUser($email: String!, $password: String!){
+          login(email: $email, password: $password){
             token
             userId
           }
         }
-      `
+      `,
+      variables: {
+        email: authData.email,
+        password: authData.password,
+      }
     }
 
     fetch(`${config.backend}/graphql`, {
@@ -126,15 +130,20 @@ class App extends Component {
     // the query attribute is required (even for mutations)
     const graphqlQuery = {
       query: `
-        mutation{
-          createUser(userInput: {email: "${authData.signupForm.email.value}", 
-          name: "${authData.signupForm.name.value}", 
-          password: "${authData.signupForm.password.value}"}) {
+        mutation CreateUser($email: String!, $name: String!, $password: String!){
+          createUser(userInput: {email: $email, 
+          name: $name, 
+          password: $password}) {
             id
             email
           }
         }
-      `
+      `,
+      variables: {
+        email: authData.signupForm.email.value,
+        name: authData.signupForm.name.value,
+        password: authData.signupForm.password.value,
+      }
     };
 
     fetch(`${config.backend}/graphql`, {

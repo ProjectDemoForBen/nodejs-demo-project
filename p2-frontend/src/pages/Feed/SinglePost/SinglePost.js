@@ -18,8 +18,8 @@ class SinglePost extends Component {
 
     const graphqlQuery = {
         query: `
-            {
-                getPost(id: ${postId}){
+            query FetchPost($id: ID!){
+                getPost(id: $id){
                     id
                     title
                     content
@@ -30,7 +30,10 @@ class SinglePost extends Component {
                     }
                 }
             }
-        `
+        `,
+        variables: {
+            id: postId
+        }
     }
     fetch(`${config.backend}/graphql`, {
         method: 'POST',
