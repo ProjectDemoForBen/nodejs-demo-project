@@ -145,5 +145,22 @@ module.exports = {
             posts: result.rows,
             totalItems: result.count,
         }
+    },
+    getPost: async function (args, req) {
+        const {id} = args;
+
+        const post = await Post.findByPk(id, {
+            include: [
+                {model: User, as: 'creator'}
+            ]
+        })
+
+        if (!post) {
+            const err = new Error('Post not found');
+            err.code = 404;
+            throw err;
+        }
+
+        return post;
     }
 }
