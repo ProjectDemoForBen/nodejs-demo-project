@@ -1,0 +1,11 @@
+{
+  "env": {
+    "PORT": 8080,
+    "DB_NAME": "messages",
+    "DB_USER": "root",
+    "DB_PASSWORD": "1234",
+    "DB_DIALECT": "mysql",
+    "DB_HOST": "localhost",
+    "DB_PORT": 3306
+  }
+}

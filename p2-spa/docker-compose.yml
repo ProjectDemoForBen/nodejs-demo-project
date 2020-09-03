@@ -1,7 +1,25 @@
 version: '3.3'
 services:
+  backend:
+    container_name: backend
+    build:
+      context: .
+    restart: always
+    ports:
+      - '8080:8080'
+    depends_on:
+      - db
+    environment:
+      PORT: 8080
+      DB_NAME: 'messages'
+      DB_USER: 'root'
+      DB_PASSWORD: '1234'
+      DB_DIALECT: 'mysql'
+      DB_HOST: 'db'
+      DB_PORT: 3306
+
   db:
-    container_name: node-p2-spa
+    container_name: db
     image: mysql:5.7.30
     restart: always
     environment:
