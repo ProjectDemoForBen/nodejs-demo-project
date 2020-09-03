@@ -4,7 +4,8 @@ const path = require('path');
 const multer = require("multer");
 const {v4: uuidv4} = require('uuid');
 const {graphqlHTTP} = require('express-graphql');
-
+const helmet = require('helmet');
+const compression = require('compression');
 
 const graphqlSchema = require('./graphql/schema');
 const graphqlResolver = require('./graphql/resolvers');
@@ -12,7 +13,6 @@ const auth = require('./middlewares/auth');
 const sequelize = require('./utils/database');
 const Post = require('./models/post');
 const User = require('./models/user');
-const {removeFile} = require("./utils/fileHelper");
 
 const app = express();
 
@@ -40,6 +40,9 @@ const fileFilter = (req, file, cb) => {
         cb(null, false);
     }
 };
+
+app.use(compression());
+app.use(helmet());
 
 app.use(bodyParser.json());
 app.use(
