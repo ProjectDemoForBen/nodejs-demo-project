@@ -149,7 +149,7 @@ Post.belongsTo(User, {
 
 
 sequelize
-    .sync()
+    .sync({force: true})
     .then(result => {
         app.listen(process.env.PORT);
     })

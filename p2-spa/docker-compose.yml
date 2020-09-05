@@ -9,6 +9,7 @@ services:
       - '8080:8080'
     depends_on:
       - db
+      - db-test
     environment:
       PORT: 8080
       DB_NAME: 'messages'
@@ -32,5 +33,19 @@ services:
     volumes:
       - node-p2-spa:/var/lib/mysql
 
+  db-test:
+    container_name: db-test
+    image: mysql:5.7.30
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'messages-test'
+      MYSQL_USER: 'root'
+      MYSQL_PASSWORD: '1234'
+      MYSQL_ROOT_PASSWORD: '1234'
+    ports:
+      - '3316:3306'
+    volumes:
+      - node-p2-spa-test:/var/lib/mysql
 volumes:
   node-p2-spa:
+  node-p2-spa-test:
