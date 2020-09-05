@@ -1,3 +1,4 @@
+const fs = require('fs');
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
@@ -6,6 +7,7 @@ const {v4: uuidv4} = require('uuid');
 const {graphqlHTTP} = require('express-graphql');
 const helmet = require('helmet');
 const compression = require('compression');
+const morgan = require('morgan');
 
 const graphqlSchema = require('./graphql/schema');
 const graphqlResolver = require('./graphql/resolvers');
@@ -43,6 +45,12 @@ const fileFilter = (req, file, cb) => {
 
 app.use(compression());
 app.use(helmet());
+
+// create a write stream (in append mode)
+const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })
+// setup the logger
+app.use(morgan('combined', { stream: accessLogStream }))
+
 
 app.use(bodyParser.json());
 app.use(
