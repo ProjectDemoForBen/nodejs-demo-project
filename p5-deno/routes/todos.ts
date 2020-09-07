@@ -1,22 +1,34 @@
 import {Router} from "https://deno.land/x/oak/mod.ts";
+import {getDb} from "../helpers/db_client.ts";
+import {ObjectId} from "https://deno.land/x/mongo@v0.11.1/mod.ts";
+
+interface TodoDto {
+    id?: string;
+    text: string;
+}
 
 interface Todo {
-    id: string;
-    text: string
+    _id: { $oid: string };
+    // _id : ObjectId; .... al hacer el equals seria { _id : ObjectId(tid) }
+    text: string;
 }
-type RequestBody = {text: string};
-type RequestParams = {todoId: string};
 
-const todos: Todo[] = []
+type RequestBody = { text: string };
+type RequestParams = { todoId: string };
 
 const router = new Router();
 
-router.get('/todos', ctx => {
+router.get('/todos', async ctx => {
     ctx.response.status = 200;
 
+    const todos = await getDb().collection<Todo>('todos').find();
+    const dtoTodos = todos.map(
+        (todo: { _id: ObjectId; text: string }) => {
+            return {id: todo._id.$oid, text: todo.text}
+        })
     // oak will assume that this should be a JSON
     ctx.response.body = {
-        todos: todos,
+        todos: dtoTodos,
     }
 
 })
@@ -24,12 +36,12 @@ router.get('/todos', ctx => {
 router.post('/todos', async ctx => {
     const body = await ctx.request.body().value as RequestBody;
 
-    const newTodo: Todo = {
-        id: new Date().toISOString(),
+    const newTodo: TodoDto = {
         text: body.text
     }
-    todos.push(newTodo);
 
+    const id = await getDb().collection<Todo>('todos').insertOne(newTodo);
+    newTodo.id = id.$oid;
     ctx.response.status = 201;
     ctx.response.body = {
         message: 'Todo inserted',
@@ -43,14 +55,18 @@ router.put('/todos/:todoId', async ctx => {
 
     const body = await ctx.request.body().value as RequestBody
 
-    const index = todos.findIndex(td => td.id === todoId);
-    if (index >= 0) {
-        todos[index] = {id: todoId, text: body.text}
+    const { matchedCount, modifiedCount, upsertedId } = await getDb().collection<Todo>('todos').updateOne({
+        _id: { $oid : todoId}
+    }, { $set: { text: body.text } });
+
+    if (matchedCount > 0) {
 
         ctx.response.status = 200;
         ctx.response.body = {
             message: 'Todo updated',
-            data: todos[index]
+            data: await getDb().collection('todos').findOne({
+                _id: { $oid : todoId}
+            })
         };
         return;
     }
@@ -61,14 +77,16 @@ router.put('/todos/:todoId', async ctx => {
     };
 })
 
-router.delete('/todos/:todoId', ctx => {
+router.delete('/todos/:todoId', async ctx => {
     const params = ctx.params as RequestParams;
     const todoId = params.todoId;
 
-    const index = todos.findIndex(td => td.id === todoId);
 
-    if (index >= 0) {
-        todos.splice(index, 1);
+    const deleteCount = await getDb().collection('todos').deleteOne({
+        _id: { $oid : todoId}
+    });
+
+    if (deleteCount > 0) {
 
         ctx.response.status = 200;
         ctx.response.body = {
